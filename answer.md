@@ -1,5 +1,13 @@
 # NYC Event Recommender — Assignment Answers
 
+## 🎥 Live Demo
+
+**Watch the 5-minute application tour:** [https://www.loom.com/share/4d026ecec1304db3b4f581bf84d29ff5](https://www.loom.com/share/4d026ecec1304db3b4f581bf84d29ff5)
+
+This video demonstrates the end-to-end functionality, including natural language queries, semantic search, and the two-agent pipeline in action.
+
+---
+
 ## Task 1: Defining Your Problem and Audience
 
 ### ✅✅✅ Problem Statement (1 sentence)
