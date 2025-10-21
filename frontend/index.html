@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NYC Event Recommender</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-icon">🗽</span>
+                    <h1>NYC Event Finder</h1>
+                </div>
+                <p class="tagline">Discover amazing events in New York City with AI-powered recommendations</p>
+            </div>
+        </header>
+
+        <!-- Search Section -->
+        <section class="search-section">
+            <div class="search-card">
+                <h2>What are you looking for?</h2>
+                <form id="searchForm" class="search-form">
+                    <div class="search-input-wrapper">
+                        <input 
+                            type="text" 
+                            id="searchInput" 
+                            class="search-input" 
+                            placeholder="e.g., baby-friendly outdoor events, romantic date night, free museum activities..."
+                            autocomplete="off"
+                        >
+                        <button type="submit" class="search-button" id="searchButton">
+                            <span class="button-text">Search Events</span>
+                            <span class="button-icon">🔍</span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Quick Filters -->
+                <div class="quick-filters">
+                    <span class="filter-label">Quick searches:</span>
+                    <button class="filter-chip" data-query="baby-friendly outdoor events">👶 Baby-Friendly</button>
+                    <button class="filter-chip" data-query="free weekend activities">💰 Free Events</button>
+                    <button class="filter-chip" data-query="romantic date night">❤️ Date Night</button>
+                    <button class="filter-chip" data-query="stroller-accessible museum">🚼 Stroller-Friendly</button>
+                    <button class="filter-chip" data-query="family-friendly indoor activities">👨‍👩‍👧‍👦 Family Fun</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loading Indicator -->
+        <div id="loadingIndicator" class="loading-indicator hidden">
+            <div class="spinner"></div>
+            <p>Finding the perfect events for you...</p>
+        </div>
+
+        <!-- Results Section -->
+        <section id="resultsSection" class="results-section hidden">
+            <!-- Response Summary -->
+            <div id="responseSummary" class="response-summary"></div>
+
+            <!-- Filters Applied -->
+            <div id="filtersApplied" class="filters-applied hidden">
+                <h3>🔍 Filters Applied</h3>
+                <div id="filtersList" class="filters-list"></div>
+            </div>
+
+            <!-- Events Grid -->
+            <div class="events-header">
+                <h3>📅 Recommended Events</h3>
+                <p id="eventCount" class="event-count"></p>
+            </div>
+            <div id="eventsGrid" class="events-grid"></div>
+
+            <!-- No Results -->
+            <div id="noResults" class="no-results hidden">
+                <span class="no-results-icon">😕</span>
+                <h3>No events found</h3>
+                <p>Try broadening your search or use different keywords</p>
+            </div>
+        </section>
+
+        <!-- Stats Section -->
+        <section class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-icon">⚡</span>
+                    <h4>Fast Search</h4>
+                    <p>AI-powered semantic search finds relevant events in milliseconds</p>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon">🎯</span>
+                    <h4>Smart Filtering</h4>
+                    <p>Automatically extracts preferences like baby-friendly, price, and location</p>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon">🤖</span>
+                    <h4>AI Recommendations</h4>
+                    <p>Powered by GPT-4 and advanced retrieval techniques</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <p>Built with ❤️ using LangChain, FastAPI, and Qdrant</p>
+                <div class="footer-links">
+                    <a href="https://timeout.com/newyork" target="_blank">Data from TimeOut NYC</a>
+                    <span>•</span>
+                    <a href="#" id="aboutLink">About</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- About Modal -->
+    <div id="aboutModal" class="modal hidden">
+        <div class="modal-content">
+            <button class="modal-close" id="closeModal">&times;</button>
+            <h2>About NYC Event Finder</h2>
+            <p>This is an AI-powered event recommendation system built as part of the AI Engineering certification challenge.</p>
+            
+            <h3>🛠 Technology Stack</h3>
+            <ul>
+                <li><strong>Backend:</strong> FastAPI + Python</li>
+                <li><strong>LLM:</strong> GPT-4o-mini (OpenAI)</li>
+                <li><strong>Vector DB:</strong> Qdrant</li>
+                <li><strong>Embeddings:</strong> OpenAI text-embedding-3-small</li>
+                <li><strong>Framework:</strong> LangChain</li>
+                <li><strong>Evaluation:</strong> RAGAS</li>
+            </ul>
+
+            <h3>✨ Features</h3>
+            <ul>
+                <li>Semantic search with natural language queries</li>
+                <li>Automatic filter extraction (baby-friendly, price, location)</li>
+                <li>Two-agent RAG pipeline (Retrieval + Response)</li>
+                <li>Real-time event recommendations from TimeOut NYC</li>
+            </ul>
+
+            <h3>📊 Evaluation Results</h3>
+            <ul>
+                <li><strong>Faithfulness:</strong> 0.577</li>
+                <li><strong>Answer Relevancy:</strong> 0.759</li>
+                <li><strong>Context Precision:</strong> 0.847</li>
+                <li><strong>Context Recall:</strong> 0.973</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
+

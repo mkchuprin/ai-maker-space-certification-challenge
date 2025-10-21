@@ -1,0 +1,16 @@
+Category,Metric,Baseline,Advanced,Improvement
+RAGAS Metrics,Faithfulness,0.581,0.507,-12.7%
+RAGAS Metrics,Answer Relevancy,0.764,0.876,+14.7%
+RAGAS Metrics,Context Precision,0.830,0.683,-17.7%
+RAGAS Metrics,Context Recall,0.973,0.800,-17.8%
+RAGAS Metrics,Average Score,0.787,0.717,-8.9%
+,,,,
+Operational Metrics,Avg Latency (seconds),7.52,8.91,-18.5%
+Operational Metrics,Success Rate (%),88.0,100.0,+12.0
+Operational Metrics,Avg Events per Query,8.8,8.9,+0.1
+Operational Metrics,Filter Usage Rate (%),28.0,20.0,-8.0
+,,,,
+System Details,Retrieval Method,Semantic Search,BM25 Keyword Search,
+System Details,Vector Database,Qdrant (OpenAI embeddings),None (in-memory BM25),
+System Details,LLM Model,GPT-4o-mini,GPT-4o-mini,
+System Details,Total Test Queries,25,25,

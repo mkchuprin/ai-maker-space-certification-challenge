@@ -1,0 +1,197 @@
+---
+alwaysApply: true
+---
+
+# NYC Event Recommender - AI Certification Challenge Project
+
+## Core Rule: ALWAYS Follow Implementation Plan
+
+**Before starting any task, ALWAYS:**
+1. Read `implemenation_docs/implementation_plan.md` to understand what to do next
+2. Check the current notebook/task number and follow its instructions exactly
+3. Reference the simplified structure (5 notebooks, 4 backend files)
+4. Use ✅✅✅ marker when answering questions for easy visibility
+
+## Project Context
+
+This is an AI Engineering certification project with a **strict deadline: October 21, 7:00 PM ET**.
+
+**Goal:** Build an Agentic RAG system that recommends NYC events from TimeOut NYC based on user preferences (baby-friendliness, location, price).
+
+**Estimated Time:** 14-20 hours (ultra-simplified approach)
+
+## Project Structure (SIMPLIFIED)
+
+```
+aie-certification-challenge/
+├── notebooks/
+│   ├── 01_data_collection.ipynb
+│   ├── 02_data_processing_and_vectordb.ipynb
+│   ├── 03_agentic_rag_pipeline.ipynb
+│   ├── 04_evaluation_and_testing.ipynb
+│   └── 05_advanced_retrieval.ipynb
+├── backend/
+│   ├── main.py              # FastAPI app
+│   ├── agents.py            # 2 agents (Retrieval + Response)
+│   ├── vector_store.py      # Qdrant operations
+│   └── config.py            # ✅ Already created
+├── data/
+│   ├── raw/
+│   ├── processed/
+│   └── test_datasets/
+├── implemenation_docs/
+│   ├── implementation_plan.md     # ✅ FOLLOW THIS
+│   └── nyc_event_recommender.md   # ✅ Reference for Tasks 1-3
+└── env.example                     # ✅ Already created
+```
+
+## Workflow Rules
+
+### 1. Sequential Execution
+- Work through notebooks 1→2→3→4→5 in order
+- Each notebook builds on the previous one
+- Don't skip ahead unless explicitly instructed
+
+### 2. Data Simplification (CRITICAL)
+**Only extract ONE metadata field from LLM:**
+- `baby_friendly: bool` (if True, implies stroller-accessible)
+- ❌ NO mood tags
+- ❌ NO energy_level
+- ✅ Semantic search handles vibe/mood naturally
+
+**CSV columns:**
+- event_id, title, description, date, category, price, location, url, baby_friendly
+
+### 3. Architecture Constraints
+- **2 agents only:** Retrieval Agent + Response Agent
+- **FastAPI backend:** 4 files total (main.py, agents.py, vector_store.py, config.py)
+- **No Streamlit UI** (removed for simplicity)
+- **Metadata filtering only** for advanced retrieval (no cross-encoders, BM25, etc.)
+
+### 4. Metadata Filtering
+**Filterable fields:**
+- price (free, $, $$, $$$)
+- baby_friendly (boolean)
+- category (outdoor, indoor, arts, food, etc.)
+- location (neighborhood name)
+- date (weekend/weekday)
+
+### 5. Code Style
+- Well-commented code
+- Use Pydantic for data validation
+- LangSmith logging for all agent interactions
+- Save all evaluation results to CSV files
+
+### 6. Evaluation Requirements
+- **Test dataset:** 25+ queries (synthetic + real)
+- **RAGAS metrics:** Faithfulness, Answer Relevancy, Context Precision, Context Recall
+- **Comparison:** Baseline vs. Metadata Filtering
+- **Save results:** `data/test_datasets/ragas_baseline_results.csv` and `ragas_advanced_results.csv`
+
+## When Writing Code
+
+### Notebook Standards
+- Use markdown cells with ✅✅✅ for important explanations
+- Include setup/import cells at the top
+- Test each section before moving forward
+- Save outputs to appropriate folders
+
+### Backend Standards
+- Use `backend/config.py` for all environment variables
+- FastAPI with Pydantic models for request/response
+- Implement LangSmith tracing
+- Keep it simple - 2 agents, linear flow
+
+### Data Standards
+- Save raw data to `data/raw/timeout_events_YYYYMMDD.csv`
+- Save processed data to `data/processed/events_with_embeddings.csv`
+- Save embeddings to `data/processed/embeddings.npy`
+- Use pandas for all CSV operations
+
+## Assignment Checklist Reference
+
+**Tasks 1-3:** Already documented in `nyc_event_recommender.md` ✅
+**Task 4:** Implement in Notebooks 1-3 (scraping → processing+DB → agents)
+**Task 5:** Implement in Notebook 4 (evaluation)
+**Task 6:** Implement in Notebook 5 (metadata filtering)
+
+## Key Implementation Details
+
+### LLM Extraction Prompt (Notebook 2)
+Extract ONLY: `baby_friendly: bool`
+
+Example prompt:
+```
+Given this event description, determine if it is baby-friendly 
+(suitable for infants/toddlers, stroller-accessible).
+Return JSON: {"baby_friendly": true/false}
+```
+
+### Retrieval Agent Logic (Notebook 3)
+1. Parse user query
+2. Extract filters (price, location, baby_friendly, category)
+3. Embed query with OpenAI
+4. Search Qdrant with filters
+5. Return top-10 results
+
+### Metadata Filtering (Notebook 5)
+Apply filters BEFORE semantic search:
+```python
+from qdrant_client.models import Filter, FieldCondition, MatchValue
+
+filters = Filter(
+    must=[
+        FieldCondition(key="baby_friendly", match=MatchValue(value=True)),
+        FieldCondition(key="price", match=MatchValue(value="free"))
+    ]
+)
+```
+
+## Common Pitfalls to Avoid
+
+❌ Don't extract mood or energy_level fields
+❌ Don't create complex multi-agent workflows (keep it 2 agents)
+❌ Don't build a Streamlit UI
+❌ Don't implement hybrid search or cross-encoders
+❌ Don't skip RAGAS evaluation
+❌ Don't forget to save evaluation results to CSV
+
+## Progress Tracking
+
+When starting work:
+1. Check implementation_plan.md for current task
+2. Verify all previous notebooks are complete
+3. Ensure data files exist in correct locations
+4. Test end-to-end before moving to next notebook
+
+## API Keys Required
+
+From `env.example`:
+- OPENAI_API_KEY
+- LANGCHAIN_API_KEY (LangSmith)
+
+## Success Criteria
+
+- [ ] 80+ events scraped from TimeOut NYC
+- [ ] Qdrant database operational
+- [ ] 2-agent pipeline responds in <5 seconds
+- [ ] RAGAS scores: Faithfulness >0.85, Context Precision >0.80
+- [ ] Metadata filtering improves scores by 5-10%
+- [ ] FastAPI running on localhost:8000
+- [ ] All 5 notebooks run end-to-end
+- [ ] README.md complete
+
+## Time Estimate by Task
+
+1. Data Collection: 2-3 hours
+2. Data Processing + Vector DB: 3-4 hours
+3. Agentic RAG Pipeline: 3-4 hours
+4. Evaluation: 3-4 hours
+5. Advanced Retrieval: 2-3 hours
+6. README: 1-2 hours
+
+**Total: 14-20 hours**
+
+---
+
+**Remember: ALWAYS check `implemenation_docs/implementation_plan.md` before starting any new task. It contains the complete, up-to-date plan.**

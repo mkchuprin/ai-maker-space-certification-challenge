@@ -1,0 +1,150 @@
+version: '3'
+
+vars:
+  VENV: .venv
+  BACKEND_DIR: backend
+  FRONTEND_DIR: frontend
+  QDRANT_LOCK: local_qdrant/.lock
+
+tasks:
+  # Main tasks
+  start:
+    desc: "Start the NYC Event Recommender (backend + frontend)"
+    cmds:
+      - task: clean-lock
+      - task: start-backend
+      - sleep 3
+      - task: open-frontend
+    silent: false
+
+  stop:
+    desc: "Stop the backend server"
+    cmds:
+      - echo "🛑 Stopping backend server..."
+      - pkill -f uvicorn || echo "No server running"
+      - echo "✅ Server stopped"
+    silent: false
+
+  restart:
+    desc: "Restart the entire application"
+    cmds:
+      - task: stop
+      - sleep 1
+      - task: start
+
+  # Backend tasks
+  start-backend:
+    desc: "Start the FastAPI backend server"
+    dir: "{{.BACKEND_DIR}}"
+    cmds:
+      - echo "🚀 Starting backend server..."
+      - source ../{{.VENV}}/bin/activate && python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000 &
+      - echo "✅ Backend starting on http://localhost:8000"
+    silent: false
+
+  backend-logs:
+    desc: "View backend server logs"
+    cmds:
+      - ps aux | grep uvicorn | grep -v grep || echo "Server not running"
+
+  test-backend:
+    desc: "Test if backend is running"
+    cmds:
+      - echo "Testing backend health..."
+      - curl -s http://localhost:8000/health | jq '.' || echo "❌ Backend not responding"
+
+  # Frontend tasks
+  open-frontend:
+    desc: "Open the frontend in browser"
+    cmds:
+      - echo "🌐 Opening frontend..."
+      - open {{.FRONTEND_DIR}}/index.html || xdg-open {{.FRONTEND_DIR}}/index.html
+      - echo "✅ Frontend opened"
+
+  # Database tasks
+  clean-lock:
+    desc: "Remove Qdrant database lock"
+    cmds:
+      - echo "🔓 Clearing Qdrant lock..."
+      - rm -f {{.QDRANT_LOCK}}
+      - echo "✅ Lock cleared"
+
+  check-db:
+    desc: "Check Qdrant database status"
+    cmds:
+      - echo "📊 Qdrant Database Status:"
+      - ls -lh local_qdrant/ || echo "❌ Database not found"
+
+  # Development tasks
+  dev:
+    desc: "Start in development mode (backend only, no browser)"
+    dir: "{{.BACKEND_DIR}}"
+    cmds:
+      - task: clean-lock
+      - echo "🔧 Starting in DEV mode..."
+      - source ../{{.VENV}}/bin/activate && python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000
+
+  test:
+    desc: "Run a test query"
+    cmds:
+      - echo "🧪 Testing with sample query..."
+      - |
+        curl -X POST http://localhost:8000/recommend \
+          -H "Content-Type: application/json" \
+          -d '{"query": "baby-friendly museum activities"}' | jq '.'
+
+  # Install and setup
+  install:
+    desc: "Install dependencies"
+    cmds:
+      - echo "📦 Installing dependencies..."
+      - source {{.VENV}}/bin/activate && pip install -r requirements.txt
+      - echo "✅ Dependencies installed"
+
+  setup:
+    desc: "First-time setup"
+    cmds:
+      - echo "🔧 Running first-time setup..."
+      - test -f .env || echo "⚠️  Warning: .env file not found!"
+      - test -d {{.VENV}} || echo "⚠️  Warning: Virtual environment not found!"
+      - test -d local_qdrant || echo "⚠️  Warning: Qdrant database not found!"
+      - echo "✅ Setup check complete"
+
+  # Utility tasks
+  status:
+    desc: "Show application status"
+    cmds:
+      - echo "📊 NYC Event Recommender Status"
+      - echo "================================"
+      - echo ""
+      - echo "Backend Server:"
+      - ps aux | grep uvicorn | grep -v grep || echo "  ❌ Not running"
+      - echo ""
+      - echo "Qdrant Database:"
+      - test -f {{.QDRANT_LOCK}} && echo "  🔒 Locked" || echo "  🔓 Unlocked"
+      - echo ""
+      - echo "Port 8000:"
+      - lsof -ti:8000 > /dev/null && echo "  ✅ In use" || echo "  ❌ Available"
+
+  clean:
+    desc: "Clean up locks and temporary files"
+    cmds:
+      - task: stop
+      - task: clean-lock
+      - echo "🧹 Cleanup complete"
+
+  help:
+    desc: "Show all available tasks"
+    cmds:
+      - task --list
+
+  # Quick commands
+  quick:
+    desc: "Quick start (for experienced users)"
+    cmds:
+      - task: clean-lock
+      - cd {{.BACKEND_DIR}} && source ../{{.VENV}}/bin/activate && python -m uvicorn main:app --reload &
+      - sleep 2
+      - open {{.FRONTEND_DIR}}/index.html
+      - echo "🎉 App started!"
+
