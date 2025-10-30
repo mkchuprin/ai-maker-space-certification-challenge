@@ -7,7 +7,6 @@ const searchInput = document.getElementById('searchInput');
 const searchButton = document.getElementById('searchButton');
 const loadingIndicator = document.getElementById('loadingIndicator');
 const resultsSection = document.getElementById('resultsSection');
-const responseSummary = document.getElementById('responseSummary');
 const filtersApplied = document.getElementById('filtersApplied');
 const filtersList = document.getElementById('filtersList');
 const eventCount = document.getElementById('eventCount');
@@ -16,9 +15,16 @@ const noResults = document.getElementById('noResults');
 const aboutModal = document.getElementById('aboutModal');
 const aboutLink = document.getElementById('aboutLink');
 const closeModal = document.getElementById('closeModal');
+const question1 = document.getElementById('question1');
+const question2 = document.getElementById('question2');
+const question3 = document.getElementById('question3');
+const question4 = document.getElementById('question4');
 
-// Quick filter chips
-const filterChips = document.querySelectorAll('.filter-chip');
+// Query builder elements
+const attendeeCheckboxes = document.querySelectorAll('input[name="attendees"]');
+const vibeCheckboxes = document.querySelectorAll('input[name="vibe"]');
+const timeCheckboxes = document.querySelectorAll('input[name="time"]');
+const budgetCheckboxes = document.querySelectorAll('input[name="budget"]');
 
 // State
 let currentQuery = '';
@@ -26,14 +32,6 @@ let currentResults = null;
 
 // Event Listeners
 searchForm.addEventListener('submit', handleSearch);
-
-filterChips.forEach(chip => {
-    chip.addEventListener('click', () => {
-        const query = chip.getAttribute('data-query');
-        searchInput.value = query;
-        handleSearch(new Event('submit'));
-    });
-});
 
 aboutLink.addEventListener('click', (e) => {
     e.preventDefault();
@@ -50,14 +48,269 @@ aboutModal.addEventListener('click', (e) => {
     }
 });
 
+// Update search input with formatted query from checkboxes
+function updateSearchInputFromCheckboxes() {
+    const selectedAttendees = Array.from(attendeeCheckboxes)
+        .filter(checkbox => checkbox.checked)
+        .map(checkbox => checkbox.value);
+    
+    const selectedVibes = Array.from(vibeCheckboxes)
+        .filter(checkbox => checkbox.checked)
+        .map(checkbox => checkbox.value);
+    
+    const selectedTimes = Array.from(timeCheckboxes)
+        .filter(checkbox => checkbox.checked)
+        .map(checkbox => checkbox.value);
+    
+    const selectedBudgets = Array.from(budgetCheckboxes)
+        .filter(checkbox => checkbox.checked)
+        .map(checkbox => checkbox.value);
+    
+    // Build the formatted query
+    const queryParts = [];
+    
+    // Add attendees part
+    if (selectedAttendees.length > 0) {
+        queryParts.push(`I'll be with ${selectedAttendees.join(', ')}`);
+    }
+    
+    // Add vibes part
+    if (selectedVibes.length > 0) {
+        queryParts.push(`we are looking for vibes ${selectedVibes.join(', ')}`);
+    }
+    
+    // Add time part
+    if (selectedTimes.length > 0) {
+        queryParts.push(`in the ${selectedTimes.join(', ')}`);
+    }
+    
+    // Add budget part
+    if (selectedBudgets.length > 0) {
+        queryParts.push(`with budget ${selectedBudgets.join(', ')}`);
+    }
+    
+    // Only update if there are selections
+    if (queryParts.length > 0) {
+        searchInput.value = `${queryParts.join(', ')}. find nyc event for me`;
+    } else {
+        searchInput.value = '';
+    }
+    
+    // Show/hide Step 2 based on textarea content
+    toggleStep2Visibility();
+}
+
+// Toggle search button visibility based on all questions being answered
+function toggleStep2Visibility() {
+    // Check if all four questions have at least one selection
+    const hasQuestion1Selection = Array.from(attendeeCheckboxes).some(cb => cb.checked);
+    const hasQuestion2Selection = Array.from(vibeCheckboxes).some(cb => cb.checked);
+    const hasQuestion3Selection = Array.from(timeCheckboxes).some(cb => cb.checked);
+    const hasQuestion4Selection = Array.from(budgetCheckboxes).some(cb => cb.checked);
+    
+    if (hasQuestion1Selection && hasQuestion2Selection && hasQuestion3Selection && hasQuestion4Selection && searchInput.value.trim().length > 0) {
+        searchButton.classList.remove('hidden');
+    } else {
+        searchButton.classList.add('hidden');
+    }
+}
+
+// Enable/disable questions based on previous answers
+function updateQuestionStates() {
+    // Check if question 1 has any selections
+    const hasQuestion1Selection = Array.from(attendeeCheckboxes).some(cb => cb.checked);
+    
+    if (hasQuestion1Selection) {
+        // Remove heartbeat if question 1 has selections
+        question1.classList.remove('heartbeat');
+        
+        // Check if question 2 was previously disabled (to trigger animation)
+        const wasQuestion2Disabled = question2.classList.contains('disabled');
+        question2.classList.remove('disabled');
+        vibeCheckboxes.forEach(cb => cb.disabled = false);
+        
+        // Remove heartbeat from question 2 when enabled
+        question2.classList.remove('heartbeat');
+        
+        // Highlight question 2 if it was just enabled
+        if (wasQuestion2Disabled) {
+            highlightQuestion(question2);
+        }
+    } else {
+        // Add heartbeat to question 1 if nothing is selected
+        question1.classList.add('heartbeat');
+        
+        question2.classList.add('disabled');
+        vibeCheckboxes.forEach(cb => cb.disabled = true);
+        // Add heartbeat to question 2 when disabled
+        question2.classList.add('heartbeat');
+        
+        // Also disable question 3 if question 1 is unchecked
+        question3.classList.add('disabled');
+        timeCheckboxes.forEach(cb => cb.disabled = true);
+        // Add heartbeat to question 3 when disabled
+        question3.classList.add('heartbeat');
+        
+        // Also disable question 4 if question 1 is unchecked
+        question4.classList.add('disabled');
+        budgetCheckboxes.forEach(cb => cb.disabled = true);
+        // Add heartbeat to question 4 when disabled
+        question4.classList.add('heartbeat');
+        
+        // Uncheck all question 2, 3, and 4 checkboxes
+        vibeCheckboxes.forEach(cb => cb.checked = false);
+        timeCheckboxes.forEach(cb => cb.checked = false);
+        budgetCheckboxes.forEach(cb => cb.checked = false);
+        updateSearchInputFromCheckboxes();
+        return; // Exit early if question 1 has no selections
+    }
+    
+    // Check if question 2 has any selections
+    const hasQuestion2Selection = Array.from(vibeCheckboxes).some(cb => cb.checked);
+    
+    if (hasQuestion2Selection) {
+        // Check if question 3 was previously disabled (to trigger animation)
+        const wasQuestion3Disabled = question3.classList.contains('disabled');
+        question3.classList.remove('disabled');
+        timeCheckboxes.forEach(cb => cb.disabled = false);
+        
+        // Remove heartbeat from question 3 when enabled
+        question3.classList.remove('heartbeat');
+        
+        // Highlight question 3 if it was just enabled
+        if (wasQuestion3Disabled) {
+            highlightQuestion(question3);
+        }
+    } else {
+        question3.classList.add('disabled');
+        timeCheckboxes.forEach(cb => cb.disabled = true);
+        // Add heartbeat to question 3 when disabled
+        question3.classList.add('heartbeat');
+        
+        // Also disable question 4 if question 2 is unchecked
+        question4.classList.add('disabled');
+        budgetCheckboxes.forEach(cb => cb.disabled = true);
+        // Add heartbeat to question 4 when disabled
+        question4.classList.add('heartbeat');
+        
+        // Uncheck all question 3 and 4 checkboxes
+        timeCheckboxes.forEach(cb => cb.checked = false);
+        budgetCheckboxes.forEach(cb => cb.checked = false);
+        updateSearchInputFromCheckboxes();
+        // Continue to check question 3 for enabling question 4
+    }
+    
+    // Check if question 3 has any selections (for enabling question 4)
+    const hasQuestion3Selection = Array.from(timeCheckboxes).some(cb => cb.checked);
+    
+    if (hasQuestion3Selection) {
+        // Check if question 4 was previously disabled (to trigger animation)
+        const wasQuestion4Disabled = question4.classList.contains('disabled');
+        question4.classList.remove('disabled');
+        budgetCheckboxes.forEach(cb => cb.disabled = false);
+        
+        // Remove heartbeat from question 4 when enabled
+        question4.classList.remove('heartbeat');
+        
+        // Highlight question 4 if it was just enabled
+        if (wasQuestion4Disabled) {
+            highlightQuestion(question4);
+        }
+    } else {
+        question4.classList.add('disabled');
+        budgetCheckboxes.forEach(cb => cb.disabled = true);
+        // Add heartbeat to question 4 when disabled
+        question4.classList.add('heartbeat');
+        
+        // Uncheck all question 4 checkboxes
+        budgetCheckboxes.forEach(cb => cb.checked = false);
+        updateSearchInputFromCheckboxes();
+    }
+    
+    // Update Step 2 visibility after question states change
+    toggleStep2Visibility();
+}
+
+// Highlight a question with animation
+function highlightQuestion(questionElement) {
+    // Remove any existing highlight
+    questionElement.classList.remove('highlight');
+    
+    // Trigger reflow to ensure animation restarts
+    void questionElement.offsetWidth;
+    
+    // Add highlight class to trigger animation
+    questionElement.classList.add('highlight');
+    
+    // Remove highlight class after animation completes
+    setTimeout(() => {
+        questionElement.classList.remove('highlight');
+    }, 1500);
+}
+
+// Initialize question states on page load
+updateQuestionStates();
+
+// Add event listeners to all checkboxes to update search input
+[...attendeeCheckboxes, ...vibeCheckboxes, ...timeCheckboxes, ...budgetCheckboxes].forEach(checkbox => {
+    checkbox.addEventListener('change', () => {
+        updateQuestionStates();
+        updateSearchInputFromCheckboxes();
+    });
+});
+
+// Add event listener to textarea for manual typing
+searchInput.addEventListener('input', toggleStep2Visibility);
+
+// Build query from form inputs
+function buildQuery() {
+    const textQuery = searchInput.value.trim();
+    const queryParts = [];
+    
+    // Add text input if provided
+    if (textQuery) {
+        queryParts.push(textQuery);
+    }
+    
+    // Add selected attendees
+    const selectedAttendees = Array.from(attendeeCheckboxes)
+        .filter(checkbox => checkbox.checked)
+        .map(checkbox => checkbox.value);
+    
+    if (selectedAttendees.length > 0) {
+        queryParts.push(`events for ${selectedAttendees.join(', ')}`);
+    }
+    
+    // Add selected vibes
+    const selectedVibes = Array.from(vibeCheckboxes)
+        .filter(checkbox => checkbox.checked)
+        .map(checkbox => checkbox.value);
+    
+    if (selectedVibes.length > 0) {
+        queryParts.push(`with ${selectedVibes.join(', ')}`);
+    }
+    
+    // Add selected time of day
+    const selectedTimes = Array.from(timeCheckboxes)
+        .filter(checkbox => checkbox.checked)
+        .map(checkbox => checkbox.value);
+    
+    if (selectedTimes.length > 0) {
+        queryParts.push(`during ${selectedTimes.join(', ')}`);
+    }
+    
+    // Combine all parts
+    return queryParts.join(' ').trim();
+}
+
 // Main search handler
 async function handleSearch(e) {
     e.preventDefault();
     
-    const query = searchInput.value.trim();
+    const query = buildQuery();
     
     if (!query) {
-        alert('Please enter a search query');
+        alert('Please enter a search query or select options');
         return;
     }
     
@@ -111,9 +364,6 @@ function hideLoading() {
 // Display results
 function displayResults(data) {
     resultsSection.classList.remove('hidden');
-    
-    // Display AI response summary
-    displayResponseSummary(data.response);
     
     // Display filters applied
     displayFilters(data.filters);

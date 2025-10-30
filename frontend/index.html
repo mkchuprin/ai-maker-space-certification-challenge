@@ -23,31 +23,109 @@
         <!-- Search Section -->
         <section class="search-section">
             <div class="search-card">
-                <h2>What are you looking for?</h2>
-                <form id="searchForm" class="search-form">
-                    <div class="search-input-wrapper">
-                        <input 
-                            type="text" 
-                            id="searchInput" 
-                            class="search-input" 
-                            placeholder="e.g., baby-friendly outdoor events, romantic date night, free museum activities..."
-                            autocomplete="off"
-                        >
-                        <button type="submit" class="search-button" id="searchButton">
-                            <span class="button-text">Search Events</span>
-                            <span class="button-icon">🔍</span>
-                        </button>
-                    </div>
-                </form>
+                <h2>Step 1 of 2: Check some boxes</h2>
 
-                <!-- Quick Filters -->
-                <div class="quick-filters">
-                    <span class="filter-label">Quick searches:</span>
-                    <button class="filter-chip" data-query="baby-friendly outdoor events">👶 Baby-Friendly</button>
-                    <button class="filter-chip" data-query="free weekend activities">💰 Free Events</button>
-                    <button class="filter-chip" data-query="romantic date night">❤️ Date Night</button>
-                    <button class="filter-chip" data-query="stroller-accessible museum">🚼 Stroller-Friendly</button>
-                    <button class="filter-chip" data-query="family-friendly indoor activities">👨‍👩‍👧‍👦 Family Fun</button>
+                <!-- Query Builder -->
+                <div class="query-builder">
+                    <div class="radio-group" id="question1">
+                        <label class="radio-group-label">Who is coming?</label>
+                        <div class="radio-options">
+                            <label class="radio-option">
+                                <input type="checkbox" name="attendees" value="grandparent(s)" id="attendees-grandparents">
+                                <span class="radio-label">Grandparent(s)</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="checkbox" name="attendees" value="newborn(s)" id="attendees-newborns">
+                                <span class="radio-label">Newborn(s)</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="checkbox" name="attendees" value="toddlers" id="attendees-toddlers">
+                                <span class="radio-label">Toddlers</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="checkbox" name="attendees" value="teens" id="attendees-teens">
+                                <span class="radio-label">Teens</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="radio-group disabled" id="question2">
+                        <label class="radio-group-label">Vibes</label>
+                        <div class="radio-options">
+                            <label class="radio-option">
+                                <input type="checkbox" name="vibe" value="relaxed" id="vibe-relaxed">
+                                <span class="radio-label">Relaxed</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="checkbox" name="vibe" value="playful" id="vibe-playful">
+                                <span class="radio-label">Playful</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="checkbox" name="vibe" value="social" id="vibe-social">
+                                <span class="radio-label">Social</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="checkbox" name="vibe" value="adventurous" id="vibe-adventurous">
+                                <span class="radio-label">Adventurous</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="checkbox" name="vibe" value="anything" id="vibe-anything">
+                                <span class="radio-label">Anything</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="radio-group disabled" id="question3">
+                        <label class="radio-group-label">Time of day</label>
+                        <div class="radio-options">
+                            <label class="radio-option">
+                                <input type="checkbox" name="time" value="morning" id="time-morning">
+                                <span class="radio-label">Morning</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="checkbox" name="time" value="afternoon" id="time-afternoon">
+                                <span class="radio-label">Afternoon</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="checkbox" name="time" value="evening" id="time-evening">
+                                <span class="radio-label">Evening</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="radio-group disabled" id="question4">
+                        <label class="radio-group-label">Budget</label>
+                        <div class="radio-options">
+                            <label class="radio-option">
+                                <input type="checkbox" name="budget" value="free" id="budget-free">
+                                <span class="radio-label">Free</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="checkbox" name="budget" value="$10 or less" id="budget-10">
+                                <span class="radio-label">$10 or less</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="checkbox" name="budget" value="$50 or less" id="budget-50">
+                                <span class="radio-label">$50 or less</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="checkbox" name="budget" value="$100 or less" id="budget-100">
+                                <span class="radio-label">$100 or less</span>
+                            </label>
+                        </div>
+                    </div>
+                    <form id="searchForm" class="search-form">
+                        <div class="search-input-wrapper">
+                            <textarea 
+                                id="searchInput" 
+                                class="search-input" 
+                                placeholder="e.g., baby-friendly outdoor events, romantic date night, free museum activities..."
+                                autocomplete="off"
+                                rows="5"
+                            ></textarea>
+                        </div>
+                    </form>
+                    <button type="submit" class="search-button hidden" id="searchButton" form="searchForm">
+                        <span class="button-text">Search Events</span>
+                        <span class="button-icon">🔍</span>
+                    </button>
                 </div>
             </div>
         </section>
@@ -60,9 +138,6 @@
 
         <!-- Results Section -->
         <section id="resultsSection" class="results-section hidden">
-            <!-- Response Summary -->
-            <div id="responseSummary" class="response-summary"></div>
-
             <!-- Filters Applied -->
             <div id="filtersApplied" class="filters-applied hidden">
                 <h3>🔍 Filters Applied</h3>
@@ -81,27 +156,6 @@
                 <span class="no-results-icon">😕</span>
                 <h3>No events found</h3>
                 <p>Try broadening your search or use different keywords</p>
-            </div>
-        </section>
-
-        <!-- Stats Section -->
-        <section class="stats-section">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <span class="stat-icon">⚡</span>
-                    <h4>Fast Search</h4>
-                    <p>AI-powered semantic search finds relevant events in milliseconds</p>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-icon">🎯</span>
-                    <h4>Smart Filtering</h4>
-                    <p>Automatically extracts preferences like baby-friendly, price, and location</p>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-icon">🤖</span>
-                    <h4>AI Recommendations</h4>
-                    <p>Powered by GPT-4 and advanced retrieval techniques</p>
-                </div>
             </div>
         </section>
 
@@ -156,4 +210,5 @@
     <script src="app.js"></script>
 </body>
 </html>
+
 
