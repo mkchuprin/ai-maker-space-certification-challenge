@@ -9,6 +9,7 @@ const loadingIndicator = document.getElementById('loadingIndicator');
 const resultsSection = document.getElementById('resultsSection');
 const filtersApplied = document.getElementById('filtersApplied');
 const filtersList = document.getElementById('filtersList');
+const responseSummary = document.getElementById('responseSummary');
 const eventCount = document.getElementById('eventCount');
 const eventsGrid = document.getElementById('eventsGrid');
 const noResults = document.getElementById('noResults');
@@ -16,15 +17,13 @@ const aboutModal = document.getElementById('aboutModal');
 const aboutLink = document.getElementById('aboutLink');
 const closeModal = document.getElementById('closeModal');
 const question1 = document.getElementById('question1');
-const question2 = document.getElementById('question2');
-const question3 = document.getElementById('question3');
 const question4 = document.getElementById('question4');
+const question5 = document.getElementById('question5');
 
 // Query builder elements
-const attendeeCheckboxes = document.querySelectorAll('input[name="attendees"]');
-const vibeCheckboxes = document.querySelectorAll('input[name="vibe"]');
-const timeCheckboxes = document.querySelectorAll('input[name="time"]');
-const budgetCheckboxes = document.querySelectorAll('input[name="budget"]');
+const babyFriendlyRadios = document.querySelectorAll('input[name="baby_friendly"]');
+const priceRadios = document.querySelectorAll('input[name="price"]');
+const settingRadios = document.querySelectorAll('input[name="setting"]');
 
 // State
 let currentQuery = '';
@@ -50,51 +49,116 @@ aboutModal.addEventListener('click', (e) => {
 
 // Update search input with formatted query from checkboxes
 function updateSearchInputFromCheckboxes() {
-    const selectedAttendees = Array.from(attendeeCheckboxes)
-        .filter(checkbox => checkbox.checked)
-        .map(checkbox => checkbox.value);
+    const selectedBabyFriendly = Array.from(babyFriendlyRadios)
+        .find(radio => radio.checked)?.value;
     
-    const selectedVibes = Array.from(vibeCheckboxes)
-        .filter(checkbox => checkbox.checked)
-        .map(checkbox => checkbox.value);
+    const selectedPrice = Array.from(priceRadios)
+        .find(radio => radio.checked)?.value;
     
-    const selectedTimes = Array.from(timeCheckboxes)
-        .filter(checkbox => checkbox.checked)
-        .map(checkbox => checkbox.value);
+    const selectedSetting = Array.from(settingRadios)
+        .find(radio => radio.checked)?.value;
     
-    const selectedBudgets = Array.from(budgetCheckboxes)
-        .filter(checkbox => checkbox.checked)
-        .map(checkbox => checkbox.value);
+    // Build the formatted query with natural language
+    const positiveParts = [];
+    const negativeParts = [];
+    let isForAdults = false;
     
-    // Build the formatted query
-    const queryParts = [];
-    
-    // Add attendees part
-    if (selectedAttendees.length > 0) {
-        queryParts.push(`I'll be with ${selectedAttendees.join(', ')}`);
+    // Add baby friendly part
+    if (selectedBabyFriendly === 'yes') {
+        positiveParts.push('baby-friendly');
+    } else if (selectedBabyFriendly === 'no') {
+        isForAdults = true;
     }
     
-    // Add vibes part
-    if (selectedVibes.length > 0) {
-        queryParts.push(`we are looking for vibes ${selectedVibes.join(', ')}`);
+    // Add price part
+    if (selectedPrice === 'free') {
+        positiveParts.push('free');
+    } else if (selectedPrice === 'not_free') {
+        negativeParts.push('free');
     }
     
-    // Add time part
-    if (selectedTimes.length > 0) {
-        queryParts.push(`in the ${selectedTimes.join(', ')}`);
+    // Add setting part
+    if (selectedSetting === 'indoor') {
+        positiveParts.push('indoor');
+    } else if (selectedSetting === 'outdoor') {
+        positiveParts.push('outdoor');
     }
     
-    // Add budget part
-    if (selectedBudgets.length > 0) {
-        queryParts.push(`with budget ${selectedBudgets.join(', ')}`);
+    // Always start with base prompt
+    let queryText = 'Find some events for me';
+    
+    // Build attributes text
+    const allParts = [];
+    
+    // Add positive attributes
+    if (positiveParts.length > 0) {
+        let positiveText;
+        if (positiveParts.length === 1) {
+            positiveText = positiveParts[0];
+        } else if (positiveParts.length === 2) {
+            positiveText = `${positiveParts[0]} and ${positiveParts[1]}`;
+        } else {
+            positiveText = `${positiveParts.slice(0, -1).join(', ')}, and ${positiveParts[positiveParts.length - 1]}`;
+        }
+        allParts.push(positiveText);
     }
     
-    // Only update if there are selections
-    if (queryParts.length > 0) {
-        searchInput.value = `${queryParts.join(', ')}. find nyc event for me`;
-    } else {
-        searchInput.value = '';
+    // Add negative attributes
+    if (negativeParts.length > 0) {
+        let negativeText;
+        if (negativeParts.length === 1) {
+            negativeText = `not ${negativeParts[0]}`;
+        } else if (negativeParts.length === 2) {
+            negativeText = `not ${negativeParts[0]} and not ${negativeParts[1]}`;
+        } else {
+            const notParts = negativeParts.map(p => `not ${p}`);
+            negativeText = `${notParts.slice(0, -1).join(', ')}, and ${notParts[notParts.length - 1]}`;
+        }
+        allParts.push(negativeText);
     }
+    
+    // Append selected attributes if any
+    if (allParts.length > 0 || isForAdults) {
+        // Handle "for adults" case
+        if (isForAdults && allParts.length === 0) {
+            queryText = `${queryText} for adults`;
+        } else if (isForAdults && allParts.length > 0) {
+            // Combine "for adults" with other attributes
+            let attributesText;
+            if (allParts.length === 1) {
+                attributesText = allParts[0];
+            } else {
+                attributesText = `${allParts[0]} and ${allParts[1]}`;
+            }
+            
+            if (positiveParts.length > 0 && negativeParts.length === 0) {
+                queryText = `${queryText} for adults and they should be ${attributesText}`;
+            } else if (positiveParts.length === 0 && negativeParts.length > 0) {
+                queryText = `${queryText} for adults and they should not be ${attributesText}`;
+            } else {
+                queryText = `${queryText} for adults and they should be ${attributesText}`;
+            }
+        } else {
+            // No "for adults", just regular attributes
+            let attributesText;
+            if (allParts.length === 1) {
+                attributesText = allParts[0];
+            } else {
+                attributesText = `${allParts[0]} and ${allParts[1]}`;
+            }
+            
+            // Use "should be" for positive attributes, "should not be" for negative
+            if (positiveParts.length > 0 && negativeParts.length === 0) {
+                queryText = `${queryText} and they should be ${attributesText}`;
+            } else if (positiveParts.length === 0 && negativeParts.length > 0) {
+                queryText = `${queryText} and they should not be ${attributesText}`;
+            } else {
+                queryText = `${queryText} and they should be ${attributesText}`;
+            }
+        }
+    }
+    
+    searchInput.value = queryText;
     
     // Show/hide Step 2 based on textarea content
     toggleStep2Visibility();
@@ -102,13 +166,12 @@ function updateSearchInputFromCheckboxes() {
 
 // Toggle search button visibility based on all questions being answered
 function toggleStep2Visibility() {
-    // Check if all four questions have at least one selection
-    const hasQuestion1Selection = Array.from(attendeeCheckboxes).some(cb => cb.checked);
-    const hasQuestion2Selection = Array.from(vibeCheckboxes).some(cb => cb.checked);
-    const hasQuestion3Selection = Array.from(timeCheckboxes).some(cb => cb.checked);
-    const hasQuestion4Selection = Array.from(budgetCheckboxes).some(cb => cb.checked);
+    // Check if all three questions have at least one selection
+    const hasQuestion1Selection = Array.from(babyFriendlyRadios).some(radio => radio.checked);
+    const hasQuestion4Selection = Array.from(priceRadios).some(radio => radio.checked);
+    const hasQuestion5Selection = Array.from(settingRadios).some(radio => radio.checked);
     
-    if (hasQuestion1Selection && hasQuestion2Selection && hasQuestion3Selection && hasQuestion4Selection && searchInput.value.trim().length > 0) {
+    if (hasQuestion1Selection && hasQuestion4Selection && hasQuestion5Selection && searchInput.value.trim().length > 0) {
         searchButton.classList.remove('hidden');
     } else {
         searchButton.classList.add('hidden');
@@ -118,96 +181,16 @@ function toggleStep2Visibility() {
 // Enable/disable questions based on previous answers
 function updateQuestionStates() {
     // Check if question 1 has any selections
-    const hasQuestion1Selection = Array.from(attendeeCheckboxes).some(cb => cb.checked);
+    const hasQuestion1Selection = Array.from(babyFriendlyRadios).some(radio => radio.checked);
     
     if (hasQuestion1Selection) {
         // Remove heartbeat if question 1 has selections
         question1.classList.remove('heartbeat');
         
-        // Check if question 2 was previously disabled (to trigger animation)
-        const wasQuestion2Disabled = question2.classList.contains('disabled');
-        question2.classList.remove('disabled');
-        vibeCheckboxes.forEach(cb => cb.disabled = false);
-        
-        // Remove heartbeat from question 2 when enabled
-        question2.classList.remove('heartbeat');
-        
-        // Highlight question 2 if it was just enabled
-        if (wasQuestion2Disabled) {
-            highlightQuestion(question2);
-        }
-    } else {
-        // Add heartbeat to question 1 if nothing is selected
-        question1.classList.add('heartbeat');
-        
-        question2.classList.add('disabled');
-        vibeCheckboxes.forEach(cb => cb.disabled = true);
-        // Add heartbeat to question 2 when disabled
-        question2.classList.add('heartbeat');
-        
-        // Also disable question 3 if question 1 is unchecked
-        question3.classList.add('disabled');
-        timeCheckboxes.forEach(cb => cb.disabled = true);
-        // Add heartbeat to question 3 when disabled
-        question3.classList.add('heartbeat');
-        
-        // Also disable question 4 if question 1 is unchecked
-        question4.classList.add('disabled');
-        budgetCheckboxes.forEach(cb => cb.disabled = true);
-        // Add heartbeat to question 4 when disabled
-        question4.classList.add('heartbeat');
-        
-        // Uncheck all question 2, 3, and 4 checkboxes
-        vibeCheckboxes.forEach(cb => cb.checked = false);
-        timeCheckboxes.forEach(cb => cb.checked = false);
-        budgetCheckboxes.forEach(cb => cb.checked = false);
-        updateSearchInputFromCheckboxes();
-        return; // Exit early if question 1 has no selections
-    }
-    
-    // Check if question 2 has any selections
-    const hasQuestion2Selection = Array.from(vibeCheckboxes).some(cb => cb.checked);
-    
-    if (hasQuestion2Selection) {
-        // Check if question 3 was previously disabled (to trigger animation)
-        const wasQuestion3Disabled = question3.classList.contains('disabled');
-        question3.classList.remove('disabled');
-        timeCheckboxes.forEach(cb => cb.disabled = false);
-        
-        // Remove heartbeat from question 3 when enabled
-        question3.classList.remove('heartbeat');
-        
-        // Highlight question 3 if it was just enabled
-        if (wasQuestion3Disabled) {
-            highlightQuestion(question3);
-        }
-    } else {
-        question3.classList.add('disabled');
-        timeCheckboxes.forEach(cb => cb.disabled = true);
-        // Add heartbeat to question 3 when disabled
-        question3.classList.add('heartbeat');
-        
-        // Also disable question 4 if question 2 is unchecked
-        question4.classList.add('disabled');
-        budgetCheckboxes.forEach(cb => cb.disabled = true);
-        // Add heartbeat to question 4 when disabled
-        question4.classList.add('heartbeat');
-        
-        // Uncheck all question 3 and 4 checkboxes
-        timeCheckboxes.forEach(cb => cb.checked = false);
-        budgetCheckboxes.forEach(cb => cb.checked = false);
-        updateSearchInputFromCheckboxes();
-        // Continue to check question 3 for enabling question 4
-    }
-    
-    // Check if question 3 has any selections (for enabling question 4)
-    const hasQuestion3Selection = Array.from(timeCheckboxes).some(cb => cb.checked);
-    
-    if (hasQuestion3Selection) {
         // Check if question 4 was previously disabled (to trigger animation)
         const wasQuestion4Disabled = question4.classList.contains('disabled');
         question4.classList.remove('disabled');
-        budgetCheckboxes.forEach(cb => cb.disabled = false);
+        priceRadios.forEach(radio => radio.disabled = false);
         
         // Remove heartbeat from question 4 when enabled
         question4.classList.remove('heartbeat');
@@ -217,13 +200,52 @@ function updateQuestionStates() {
             highlightQuestion(question4);
         }
     } else {
+        // Add heartbeat to question 1 if nothing is selected
+        question1.classList.add('heartbeat');
+        
+        // Also disable question 4 if question 1 is unchecked
         question4.classList.add('disabled');
-        budgetCheckboxes.forEach(cb => cb.disabled = true);
+        priceRadios.forEach(radio => radio.disabled = true);
         // Add heartbeat to question 4 when disabled
         question4.classList.add('heartbeat');
         
-        // Uncheck all question 4 checkboxes
-        budgetCheckboxes.forEach(cb => cb.checked = false);
+        // Also disable question 5 if question 1 is unchecked
+        question5.classList.add('disabled');
+        settingRadios.forEach(radio => radio.disabled = true);
+        // Add heartbeat to question 5 when disabled
+        question5.classList.add('heartbeat');
+        
+        // Uncheck all question 4 and 5 radios
+        priceRadios.forEach(radio => radio.checked = false);
+        settingRadios.forEach(radio => radio.checked = false);
+        updateSearchInputFromCheckboxes();
+        return; // Exit early if question 1 has no selections
+    }
+    
+    // Check if question 4 has any selections (for enabling question 5)
+    const hasQuestion4Selection = Array.from(priceRadios).some(radio => radio.checked);
+    
+    if (hasQuestion4Selection) {
+        // Check if question 5 was previously disabled (to trigger animation)
+        const wasQuestion5Disabled = question5.classList.contains('disabled');
+        question5.classList.remove('disabled');
+        settingRadios.forEach(radio => radio.disabled = false);
+        
+        // Remove heartbeat from question 5 when enabled
+        question5.classList.remove('heartbeat');
+        
+        // Highlight question 5 if it was just enabled
+        if (wasQuestion5Disabled) {
+            highlightQuestion(question5);
+        }
+    } else {
+        question5.classList.add('disabled');
+        settingRadios.forEach(radio => radio.disabled = true);
+        // Add heartbeat to question 5 when disabled
+        question5.classList.add('heartbeat');
+        
+        // Uncheck all question 5 radios
+        settingRadios.forEach(radio => radio.checked = false);
         updateSearchInputFromCheckboxes();
     }
     
@@ -251,9 +273,12 @@ function highlightQuestion(questionElement) {
 // Initialize question states on page load
 updateQuestionStates();
 
-// Add event listeners to all checkboxes to update search input
-[...attendeeCheckboxes, ...vibeCheckboxes, ...timeCheckboxes, ...budgetCheckboxes].forEach(checkbox => {
-    checkbox.addEventListener('change', () => {
+// Initialize textarea with base prompt
+searchInput.value = 'Find some events for me';
+
+// Add event listeners to all checkboxes/radios to update search input
+[...babyFriendlyRadios, ...priceRadios, ...settingRadios].forEach(input => {
+    input.addEventListener('change', () => {
         updateQuestionStates();
         updateSearchInputFromCheckboxes();
     });
@@ -272,31 +297,32 @@ function buildQuery() {
         queryParts.push(textQuery);
     }
     
-    // Add selected attendees
-    const selectedAttendees = Array.from(attendeeCheckboxes)
-        .filter(checkbox => checkbox.checked)
-        .map(checkbox => checkbox.value);
+    // Add selected baby friendly preference
+    const selectedBabyFriendly = Array.from(babyFriendlyRadios)
+        .find(radio => radio.checked)?.value;
     
-    if (selectedAttendees.length > 0) {
-        queryParts.push(`events for ${selectedAttendees.join(', ')}`);
+    if (selectedBabyFriendly === 'yes') {
+        queryParts.push('baby-friendly events');
     }
     
-    // Add selected vibes
-    const selectedVibes = Array.from(vibeCheckboxes)
-        .filter(checkbox => checkbox.checked)
-        .map(checkbox => checkbox.value);
+    // Add selected price preference
+    const selectedPrice = Array.from(priceRadios)
+        .find(radio => radio.checked)?.value;
     
-    if (selectedVibes.length > 0) {
-        queryParts.push(`with ${selectedVibes.join(', ')}`);
+    if (selectedPrice === 'free') {
+        queryParts.push('free events');
+    } else if (selectedPrice === 'not_free') {
+        queryParts.push('not free events');
     }
     
-    // Add selected time of day
-    const selectedTimes = Array.from(timeCheckboxes)
-        .filter(checkbox => checkbox.checked)
-        .map(checkbox => checkbox.value);
+    // Add selected setting preference
+    const selectedSetting = Array.from(settingRadios)
+        .find(radio => radio.checked)?.value;
     
-    if (selectedTimes.length > 0) {
-        queryParts.push(`during ${selectedTimes.join(', ')}`);
+    if (selectedSetting === 'indoor') {
+        queryParts.push('indoor events');
+    } else if (selectedSetting === 'outdoor') {
+        queryParts.push('outdoor events');
     }
     
     // Combine all parts
@@ -368,6 +394,11 @@ function displayResults(data) {
     // Display filters applied
     displayFilters(data.filters);
     
+    // Display AI response summary
+    if (data.response) {
+        displayResponseSummary(data.response);
+    }
+    
     // Display events
     if (data.events && data.events.length > 0) {
         displayEvents(data.events);
@@ -425,15 +456,19 @@ function displayFilters(filters) {
     filtersList.innerHTML = '';
     
     Object.entries(filters).forEach(([key, value]) => {
-        const tag = document.createElement('div');
-        tag.className = 'filter-tag';
-        
-        let icon = '🔍';
-        let displayValue = value;
+        // Only display recognized filters
+        let icon = null;
+        let displayValue = null;
         
         if (key === 'baby_friendly') {
             icon = value ? '👶' : '❌';
             displayValue = value ? 'Baby-Friendly' : 'Not Baby-Friendly';
+        } else if (key === 'is_free') {
+            icon = '💰';
+            displayValue = value ? 'Free' : 'Not Free';
+        } else if (key === 'indoor_or_outdoor') {
+            icon = value === 'indoor' ? '🏠' : value === 'outdoor' ? '🌳' : '🏠🌳';
+            displayValue = value === 'indoor' ? 'Indoor' : value === 'outdoor' ? 'Outdoor' : 'Indoor/Outdoor';
         } else if (key === 'price') {
             icon = '💰';
             displayValue = `Price: ${value}`;
@@ -445,9 +480,19 @@ function displayFilters(filters) {
             displayValue = `Location: ${value}`;
         }
         
-        tag.innerHTML = `<span>${icon}</span><span>${displayValue}</span>`;
-        filtersList.appendChild(tag);
+        // Only create tag if we have a recognized filter
+        if (icon !== null && displayValue !== null) {
+            const tag = document.createElement('div');
+            tag.className = 'filter-tag';
+            tag.innerHTML = `<span>${icon}</span><span>${displayValue}</span>`;
+            filtersList.appendChild(tag);
+        }
     });
+    
+    // Hide filters section if no valid filters were displayed
+    if (filtersList.children.length === 0) {
+        filtersApplied.classList.add('hidden');
+    }
 }
 
 // Display events

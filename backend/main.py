@@ -8,9 +8,9 @@ import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
 from dotenv import load_dotenv
-from backend.agents import EventRecommenderPipeline
+from agents import EventRecommenderPipeline
 
 # Load environment variables
 load_dotenv()
@@ -38,7 +38,7 @@ app.add_middleware(
 )
 
 # Initialize the pipeline
-pipeline = EventRecommenderPipeline(qdrant_path="./local_qdrant")
+pipeline = EventRecommenderPipeline(qdrant_path="../local_qdrant")
 
 
 class QueryRequest(BaseModel):
@@ -47,11 +47,17 @@ class QueryRequest(BaseModel):
     top_k: Optional[int] = Field(5, description="Number of events to return", ge=1, le=20)
 
 
+class EventItem(BaseModel):
+    """Individual event item."""
+    event: dict
+    score: float
+
 class QueryResponse(BaseModel):
     """Response model for event recommendations."""
     query: str
     filters: dict
     response: str
+    events: List[EventItem]
     num_events: int
 
 
@@ -84,6 +90,7 @@ def recommend_events(request: QueryRequest):
             query=result["query"],
             filters=result["filters"],
             response=result["response"],
+            events=[EventItem(event=e["event"], score=e["score"]) for e in result["events"]],
             num_events=len(result["events"])
         )
     

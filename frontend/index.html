@@ -27,86 +27,53 @@
                 <!-- Query Builder -->
                 <div class="query-builder">
                     <div class="radio-group" id="question1">
-                        <label class="radio-group-label">Who is coming?</label>
+                        <label class="radio-group-label">Baby friendly?</label>
                         <div class="radio-options">
                             <label class="radio-option">
-                                <input type="checkbox" name="attendees" value="grandparent(s)" id="attendees-grandparents">
-                                <span class="radio-label">Grandparent(s)</span>
+                                <input type="radio" name="baby_friendly" value="yes" id="baby-friendly-yes">
+                                <span class="radio-label">Yes</span>
                             </label>
                             <label class="radio-option">
-                                <input type="checkbox" name="attendees" value="newborn(s)" id="attendees-newborns">
-                                <span class="radio-label">Newborn(s)</span>
+                                <input type="radio" name="baby_friendly" value="no" id="baby-friendly-no">
+                                <span class="radio-label">No</span>
                             </label>
                             <label class="radio-option">
-                                <input type="checkbox" name="attendees" value="toddlers" id="attendees-toddlers">
-                                <span class="radio-label">Toddlers</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="checkbox" name="attendees" value="teens" id="attendees-teens">
-                                <span class="radio-label">Teens</span>
-                            </label>
-                        </div>
-                    </div>
-                    <div class="radio-group disabled" id="question2">
-                        <label class="radio-group-label">Vibes</label>
-                        <div class="radio-options">
-                            <label class="radio-option">
-                                <input type="checkbox" name="vibe" value="relaxed" id="vibe-relaxed">
-                                <span class="radio-label">Relaxed</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="checkbox" name="vibe" value="playful" id="vibe-playful">
-                                <span class="radio-label">Playful</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="checkbox" name="vibe" value="social" id="vibe-social">
-                                <span class="radio-label">Social</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="checkbox" name="vibe" value="adventurous" id="vibe-adventurous">
-                                <span class="radio-label">Adventurous</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="checkbox" name="vibe" value="anything" id="vibe-anything">
-                                <span class="radio-label">Anything</span>
-                            </label>
-                        </div>
-                    </div>
-                    <div class="radio-group disabled" id="question3">
-                        <label class="radio-group-label">Time of day</label>
-                        <div class="radio-options">
-                            <label class="radio-option">
-                                <input type="checkbox" name="time" value="morning" id="time-morning">
-                                <span class="radio-label">Morning</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="checkbox" name="time" value="afternoon" id="time-afternoon">
-                                <span class="radio-label">Afternoon</span>
-                            </label>
-                            <label class="radio-option">
-                                <input type="checkbox" name="time" value="evening" id="time-evening">
-                                <span class="radio-label">Evening</span>
+                                <input type="radio" name="baby_friendly" value="either" id="baby-friendly-either">
+                                <span class="radio-label">Either</span>
                             </label>
                         </div>
                     </div>
                     <div class="radio-group disabled" id="question4">
-                        <label class="radio-group-label">Budget</label>
+                        <label class="radio-group-label">Price</label>
                         <div class="radio-options">
                             <label class="radio-option">
-                                <input type="checkbox" name="budget" value="free" id="budget-free">
+                                <input type="radio" name="price" value="free" id="price-free">
                                 <span class="radio-label">Free</span>
                             </label>
                             <label class="radio-option">
-                                <input type="checkbox" name="budget" value="$10 or less" id="budget-10">
-                                <span class="radio-label">$10 or less</span>
+                                <input type="radio" name="price" value="not_free" id="price-not-free">
+                                <span class="radio-label">Not free</span>
                             </label>
                             <label class="radio-option">
-                                <input type="checkbox" name="budget" value="$50 or less" id="budget-50">
-                                <span class="radio-label">$50 or less</span>
+                                <input type="radio" name="price" value="either" id="price-either">
+                                <span class="radio-label">Either</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="radio-group disabled" id="question5">
+                        <label class="radio-group-label">Setting</label>
+                        <div class="radio-options">
+                            <label class="radio-option">
+                                <input type="radio" name="setting" value="indoor" id="setting-indoor">
+                                <span class="radio-label">Indoor</span>
                             </label>
                             <label class="radio-option">
-                                <input type="checkbox" name="budget" value="$100 or less" id="budget-100">
-                                <span class="radio-label">$100 or less</span>
+                                <input type="radio" name="setting" value="outdoor" id="setting-outdoor">
+                                <span class="radio-label">Outdoor</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="setting" value="either" id="setting-either">
+                                <span class="radio-label">Either</span>
                             </label>
                         </div>
                     </div>
@@ -142,6 +109,9 @@
                 <h3>🔍 Filters Applied</h3>
                 <div id="filtersList" class="filters-list"></div>
             </div>
+
+            <!-- AI Response Summary -->
+            <div id="responseSummary" class="response-summary"></div>
 
             <!-- Events Grid -->
             <div class="events-header">
