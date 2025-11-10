@@ -1,26 +1,24 @@
 query,num_events_retrieved,filters_applied,faithfulness,answer_relevancy,context_precision,context_recall
-What's a free outdoor event this Saturday that's baby-friendly?,0,"{'baby_friendly': True, 'price': 'free'}",0.5,0.0,0.9999999999,1.0
-Baby-friendly museum activities this weekend,10,{'baby_friendly': True},0.48484848484848486,0.9173781432115152,0.9999999999666667,1.0
-Stroller-accessible park events,10,{'baby_friendly': True},0.4722222222222222,0.9335111208366683,0.9999999999,1.0
-Family-friendly indoor activities for toddlers,10,{'baby_friendly': True},0.6666666666666666,0.9434885168731714,0.5833333333041666,1.0
-Kid-friendly art exhibits,10,{'baby_friendly': True},0.5882352941176471,0.9256799227821703,0.9999999999666667,1.0
-Romantic date night near a museum,10,{},0.6,0.9351904329357245,0.999999999975,1.0
-Intimate cultural event for couples,10,{},0.4722222222222222,0.9155137664871441,0.8333333332916666,1.0
-Cozy evening activity for two,10,{},0.68,0.9052970096176681,0.5833333333041666,1.0
-High-energy outdoor activity with friends,10,{},0.5185185185185185,0.9127650743849927,0.9999999999,0.6666666666666666
-Relaxing cultural event for adults,10,{},0.4642857142857143,0.8851448139918383,0.9999999999666667,1.0
-Fun social gathering,10,{},0.6857142857142857,0.8715114894811987,0.9999999999666667,1.0
-Peaceful art exhibition,10,{},0.6129032258064516,0.8963442643529668,0.5833333333041666,1.0
-Comedy shows this week,10,{},0.6153846153846154,0.921814083820269,0.99999999995,1.0
-Live music performances,10,{},0.8421052631578947,0.872978104251624,0.9999999999666667,1.0
-Art gallery openings,10,{},0.5172413793103449,0.9173652403201258,0.9999999999,1.0
-Food festivals,10,{},0.7272727272727273,0.8925382415498669,0.99999999995,0.6666666666666666
-Free events this weekend,0,{'price': 'free'},0.5,0.0,0.9999999999,1.0
-Budget-friendly activities,0,{'price': 'free'},0.5,0.0,0.9999999999,1.0
-Events in Brooklyn,10,{},0.76,0.9297814298777428,0.99999999995,1.0
-Things to do near Central Park,10,{},0.5625,0.9111745958325045,0.0,1.0
-Outdoor yoga or fitness classes,10,{},0.42857142857142855,0.0,0.0,1.0
-Photography exhibitions,10,{},0.5555555555555556,0.910237160868547,0.8333333332916666,1.0
-Theater performances,10,{},0.7272727272727273,0.872888031785617,0.3333333333,1.0
-Halloween events,10,{},0.43333333333333335,0.9102282322858722,0.9999999999666667,1.0
-Food and drink tastings,10,{},0.6,0.9075486015625772,0.9999999999666667,1.0
+Baby-friendly museum activities,10,"{'baby_friendly': True, 'indoor_or_outdoor': 'indoor'}",0.5238095238095238,0.9379624948587123,0.8333333332916666,1.0
+Stroller-accessible events,10,{'baby_friendly': True},0.4230769230769231,0.9247062522610573,0.99999999995,1.0
+Indoor activities for toddlers,10,"{'baby_friendly': True, 'indoor_or_outdoor': 'indoor'}",0.68,0.9343335021674714,0.0,1.0
+Kid-friendly art exhibits,10,{'baby_friendly': True},0.6086956521739131,0.9380481796341056,0.9999999999666667,0.6666666666666666
+Outdoor events this weekend,10,{'indoor_or_outdoor': 'outdoor'},0.4583333333333333,0.9199887303319086,0.99999999995,1.0
+Outdoor festivals,10,{'indoor_or_outdoor': 'outdoor'},0.5789473684210527,0.8956132376625175,0.9999999999666667,1.0
+Parks and outdoor spaces,10,{'indoor_or_outdoor': 'outdoor'},0.7368421052631579,0.8157058368096298,0.49999999995,1.0
+Free events this weekend,10,{'is_free': True},0.4583333333333333,0.8956232560958161,0.9999999999,1.0
+Free museum days,10,"{'is_free': True, 'indoor_or_outdoor': 'indoor'}",,0.9041167195739873,0.0,1.0
+Free art exhibitions,10,{'is_free': True},0.44,0.9060838850831997,0.0,1.0
+Free outdoor baby-friendly events,10,"{'baby_friendly': True, 'is_free': True, 'indoor_or_outdoor': 'outdoor'}",0.41025641025641024,0.9303020865915075,0.0,1.0
+Free indoor activities for kids,10,"{'baby_friendly': True, 'is_free': True, 'indoor_or_outdoor': 'indoor'}",0.6818181818181818,0.9165242261264966,0.9999999999666667,0.3333333333333333
+Free outdoor festivals,10,"{'is_free': True, 'indoor_or_outdoor': 'outdoor'}",0.4444444444444444,0.9127281949862182,0.8333333332916666,1.0
+Romantic date night,10,{},0.7222222222222222,0.901325799817787,0.3333333333,1.0
+Indoor romantic activities,10,{'indoor_or_outdoor': 'indoor'},0.6666666666666666,0.9275644209690223,0.9999999999,1.0
+High-energy outdoor activity,10,{'indoor_or_outdoor': 'outdoor'},0.37142857142857144,0.9076422514304626,0.3333333333,1.0
+Relaxing cultural event,10,{},0.6571428571428571,0.8850345798338978,0.9999999999666667,1.0
+Peaceful art exhibition,10,{},0.46153846153846156,0.8987414837456468,0.5833333333041666,1.0
+Comedy shows,10,{},0.5714285714285714,0.8715762575355394,0.8333333332916666,1.0
+Live music performances,10,{},0.40540540540540543,0.8884595158244909,0.8333333332916666,1.0
+Art gallery openings,10,{'indoor_or_outdoor': 'indoor'},0.4074074074074074,0.9161700402970561,0.3333333333,1.0
+Food festivals,10,{'indoor_or_outdoor': 'outdoor'},0.7435897435897436,0.8925658486210679,0.9999999999666667,1.0
+Theater performances,10,{},0.55,0.8699533577205729,0.8333333332916666,1.0
