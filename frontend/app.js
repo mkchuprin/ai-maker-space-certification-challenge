@@ -9,7 +9,6 @@ const loadingIndicator = document.getElementById('loadingIndicator');
 const resultsSection = document.getElementById('resultsSection');
 const filtersApplied = document.getElementById('filtersApplied');
 const filtersList = document.getElementById('filtersList');
-const responseSummary = document.getElementById('responseSummary');
 const eventCount = document.getElementById('eventCount');
 const eventsGrid = document.getElementById('eventsGrid');
 const noResults = document.getElementById('noResults');
@@ -397,11 +396,6 @@ function displayResults(data) {
     // Display filters applied
     displayFilters(data.filters);
     
-    // Display AI response summary
-    if (data.response) {
-        displayResponseSummary(data.response);
-    }
-    
     // Display events
     if (data.events && data.events.length > 0) {
         displayEvents(data.events);
@@ -413,39 +407,6 @@ function displayResults(data) {
     
     // Scroll to results
     resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-// Display AI response summary
-function displayResponseSummary(response) {
-    // Parse markdown-style response
-    const formattedResponse = formatMarkdownResponse(response);
-    responseSummary.innerHTML = formattedResponse;
-}
-
-// Format markdown-style response
-function formatMarkdownResponse(text) {
-    // Convert markdown to HTML
-    let html = text;
-    
-    // Headers
-    html = html.replace(/### (.*?)(\n|$)/g, '<h3>$1</h3>');
-    html = html.replace(/## (.*?)(\n|$)/g, '<h3>$1</h3>');
-    html = html.replace(/# (.*?)(\n|$)/g, '<h3>$1</h3>');
-    
-    // Bold
-    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    
-    // Links
-    html = html.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
-    
-    // Line breaks
-    html = html.replace(/\n\n/g, '</p><p>');
-    html = html.replace(/\n/g, '<br>');
-    
-    // Wrap in paragraphs
-    html = '<p>' + html + '</p>';
-    
-    return html;
 }
 
 // Display filters
@@ -537,11 +498,6 @@ function createEventCard(event, score, index) {
         </div>
         
         <p class="event-description">${escapeHtml(truncatedDescription)}</p>
-        
-        <div class="event-meta">
-            ${babyFriendly ? '<span class="event-badge baby-friendly">👶 Baby-Friendly</span>' : ''}
-            <span class="event-badge">📍 NYC</span>
-        </div>
         
         <a href="${escapeHtml(url)}" target="_blank" class="event-link">
             View Details →
