@@ -5,17 +5,11 @@ using the agentic RAG pipeline.
 """
 
 import os
-import sys
-from pathlib import Path
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import Optional
 from dotenv import load_dotenv
-
-# Add parent directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
 from backend.agents import EventRecommenderPipeline
 
 # Load environment variables
@@ -44,7 +38,7 @@ app.add_middleware(
 )
 
 # Initialize the pipeline
-pipeline = EventRecommenderPipeline(qdrant_path="../local_qdrant")
+pipeline = EventRecommenderPipeline(qdrant_path="./local_qdrant")
 
 
 class QueryRequest(BaseModel):
@@ -58,7 +52,6 @@ class QueryResponse(BaseModel):
     query: str
     filters: dict
     response: str
-    events: list
     num_events: int
 
 
@@ -72,7 +65,7 @@ def read_root():
     }
 
 
-@app.post("/recommend")
+@app.post("/recommend", response_model=QueryResponse)
 def recommend_events(request: QueryRequest):
     """
     Get event recommendations based on user query.
@@ -87,13 +80,12 @@ def recommend_events(request: QueryRequest):
         # Run the pipeline
         result = pipeline.run(request.query)
         
-        return {
-            "query": result["query"],
-            "filters": result["filters"],
-            "response": result["response"],
-            "events": result["events"],
-            "num_events": len(result["events"])
-        }
+        return QueryResponse(
+            query=result["query"],
+            filters=result["filters"],
+            response=result["response"],
+            num_events=len(result["events"])
+        )
     
     except Exception as e:
         raise HTTPException(

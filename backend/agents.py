@@ -42,15 +42,21 @@ Query: "{query}"
 
 Return JSON with these optional filters:
 - baby_friendly: true/false (if query mentions babies, infants, toddlers, strollers, kids, family-friendly)
-- price: "free" (only if query explicitly mentions free)
+- is_free: true (only if query explicitly mentions free)
+- indoor_or_outdoor: "indoor" | "outdoor" | "both" (if query mentions location type)
+  * "indoor" for museums, theaters, indoor venues
+  * "outdoor" for parks, outdoor festivals, street events
+  * "both" for flexible or mixed indoor/outdoor activities
 
 If a filter is not mentioned, omit it from the JSON.
 
 Examples:
 - "baby-friendly museum" → {{"baby_friendly": true}}
-- "free outdoor event" → {{"price": "free"}}
+- "free outdoor event" → {{"is_free": true, "indoor_or_outdoor": "outdoor"}}
 - "romantic date night" → {{}}
-- "stroller-accessible park" → {{"baby_friendly": true}}
+- "stroller-accessible park" → {{"baby_friendly": true, "indoor_or_outdoor": "outdoor"}}
+- "indoor activities for kids" → {{"baby_friendly": true, "indoor_or_outdoor": "indoor"}}
+- "free museum" → {{"is_free": true, "indoor_or_outdoor": "indoor"}}
 
 Return ONLY valid JSON, no explanations."""
 

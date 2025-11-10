@@ -100,7 +100,11 @@ class VectorStore:
         Args:
             query: Search query string
             top_k: Number of results to return
-            filters: Optional metadata filters, e.g. {"baby_friendly": True}
+            filters: Optional metadata filters, e.g.:
+                - {"baby_friendly": True} - filter for baby-friendly events
+                - {"is_free": True} - filter for free events
+                - {"indoor_or_outdoor": "indoor"} - filter by location type
+                - Multiple filters can be combined in one dict
         
         Returns:
             List of search results with scores and payloads
