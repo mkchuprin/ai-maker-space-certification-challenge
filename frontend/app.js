@@ -85,7 +85,7 @@ function updateSearchInputFromCheckboxes() {
     }
     
     // Always start with base prompt
-    let queryText = 'Find some events for me';
+    let queryText = 'Find some events';
     
     // Build attributes text
     const allParts = [];
@@ -132,11 +132,11 @@ function updateSearchInputFromCheckboxes() {
             }
             
             if (positiveParts.length > 0 && negativeParts.length === 0) {
-                queryText = `${queryText} for adults and they should be ${attributesText}`;
+                queryText = `${queryText} for adults, they should be ${attributesText}`;
             } else if (positiveParts.length === 0 && negativeParts.length > 0) {
-                queryText = `${queryText} for adults and they should not be ${attributesText}`;
+                queryText = `${queryText} for adults, they should not be ${attributesText}`;
             } else {
-                queryText = `${queryText} for adults and they should be ${attributesText}`;
+                queryText = `${queryText} for adults, they should be ${attributesText}`;
             }
         } else {
             // No "for adults", just regular attributes
@@ -149,11 +149,11 @@ function updateSearchInputFromCheckboxes() {
             
             // Use "should be" for positive attributes, "should not be" for negative
             if (positiveParts.length > 0 && negativeParts.length === 0) {
-                queryText = `${queryText} and they should be ${attributesText}`;
+                queryText = `${queryText}, they should be ${attributesText}`;
             } else if (positiveParts.length === 0 && negativeParts.length > 0) {
-                queryText = `${queryText} and they should not be ${attributesText}`;
+                queryText = `${queryText}, they should not be ${attributesText}`;
             } else {
-                queryText = `${queryText} and they should be ${attributesText}`;
+                queryText = `${queryText}, they should be ${attributesText}`;
             }
         }
     }
@@ -166,14 +166,17 @@ function updateSearchInputFromCheckboxes() {
 
 // Toggle search button visibility based on all questions being answered
 function toggleStep2Visibility() {
+    const step2Heading = document.getElementById('step2Heading');
     // Check if all three questions have at least one selection
     const hasQuestion1Selection = Array.from(babyFriendlyRadios).some(radio => radio.checked);
     const hasQuestion4Selection = Array.from(priceRadios).some(radio => radio.checked);
     const hasQuestion5Selection = Array.from(settingRadios).some(radio => radio.checked);
     
     if (hasQuestion1Selection && hasQuestion4Selection && hasQuestion5Selection && searchInput.value.trim().length > 0) {
+        step2Heading.classList.remove('hidden');
         searchButton.classList.remove('hidden');
     } else {
+        step2Heading.classList.add('hidden');
         searchButton.classList.add('hidden');
     }
 }
@@ -274,7 +277,7 @@ function highlightQuestion(questionElement) {
 updateQuestionStates();
 
 // Initialize textarea with base prompt
-searchInput.value = 'Find some events for me';
+searchInput.value = 'Find some events';
 
 // Add event listeners to all checkboxes/radios to update search input
 [...babyFriendlyRadios, ...priceRadios, ...settingRadios].forEach(input => {
