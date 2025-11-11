@@ -8,9 +8,9 @@ import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-from typing import Optional, List, Dict, Any
+from typing import Optional
 from dotenv import load_dotenv
-from agents import EventRecommenderPipeline
+from backend.agents import EventRecommenderPipeline
 
 # Load environment variables
 load_dotenv()
@@ -38,27 +38,7 @@ app.add_middleware(
 )
 
 # Initialize the pipeline
-pipeline = EventRecommenderPipeline(qdrant_path="../local_qdrant")
-
-# Query cache: stores query -> result mappings
-query_cache: Dict[str, Dict[str, Any]] = {}
-
-
-def normalize_query(query: str) -> str:
-    """Normalize query for cache key (lowercase, strip whitespace)."""
-    return query.lower().strip()
-
-
-def get_cached_result(query: str) -> Optional[Dict[str, Any]]:
-    """Check if query result is cached."""
-    normalized = normalize_query(query)
-    return query_cache.get(normalized)
-
-
-def cache_result(query: str, result: Dict[str, Any]) -> None:
-    """Cache query result."""
-    normalized = normalize_query(query)
-    query_cache[normalized] = result
+pipeline = EventRecommenderPipeline(qdrant_path="./local_qdrant")
 
 
 class QueryRequest(BaseModel):
@@ -67,17 +47,11 @@ class QueryRequest(BaseModel):
     top_k: Optional[int] = Field(5, description="Number of events to return", ge=1, le=20)
 
 
-class EventItem(BaseModel):
-    """Individual event item."""
-    event: dict
-    score: float
-
 class QueryResponse(BaseModel):
     """Response model for event recommendations."""
     query: str
     filters: dict
     response: str
-    events: List[EventItem]
     num_events: int
 
 
@@ -103,28 +77,13 @@ def recommend_events(request: QueryRequest):
         QueryResponse with recommendations and metadata
     """
     try:
-        # Check cache first
-        cached_result = get_cached_result(request.query)
-        if cached_result:
-            return QueryResponse(
-                query=cached_result["query"],
-                filters=cached_result["filters"],
-                response=cached_result["response"],
-                events=[EventItem(event=e["event"], score=e["score"]) for e in cached_result["events"]],
-                num_events=len(cached_result["events"])
-            )
-        
-        # Run the pipeline if not cached
+        # Run the pipeline
         result = pipeline.run(request.query)
-        
-        # Cache the result
-        cache_result(request.query, result)
         
         return QueryResponse(
             query=result["query"],
             filters=result["filters"],
             response=result["response"],
-            events=[EventItem(event=e["event"], score=e["score"]) for e in result["events"]],
             num_events=len(result["events"])
         )
     

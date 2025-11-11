@@ -1,7 +1,7 @@
 
 ## Filter Usage Patterns
 
-- []: 6 queries
+- []: 7 queries
 
 - [('indoor_or_outdoor', 'outdoor')]: 5 queries
 
@@ -16,4 +16,4 @@
 
 - Total queries: 23
 - Successful (≥3 events): 23 (100.0%)
-- Average events per query: 10.0
+- Average events per query: 9.9

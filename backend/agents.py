@@ -11,7 +11,7 @@ from typing import Dict, List, Any, TypedDict
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import StateGraph, END
-from vector_store import VectorStore
+from backend.vector_store import VectorStore
 
 
 class AgentState(TypedDict):
@@ -41,27 +41,22 @@ class EventRecommenderPipeline:
 Query: "{query}"
 
 Return JSON with these optional filters:
-- baby_friendly: true/false (if query mentions babies, infants, toddlers, strollers, kids, family-friendly, OR "for adults" means false)
-- is_free: true/false (if query mentions "free" → true, if query mentions "not free" or "paid" → false)
+- baby_friendly: true/false (if query mentions babies, infants, toddlers, strollers, kids, family-friendly)
+- is_free: true (only if query explicitly mentions free)
 - indoor_or_outdoor: "indoor" | "outdoor" | "both" (if query mentions location type)
   * "indoor" for museums, theaters, indoor venues
   * "outdoor" for parks, outdoor festivals, street events
   * "both" for flexible or mixed indoor/outdoor activities
-
-Important:
-- "for adults" means baby_friendly: false
-- "not free" or "paid" means is_free: false
-- Only include filters that are explicitly mentioned
 
 If a filter is not mentioned, omit it from the JSON.
 
 Examples:
 - "baby-friendly museum" → {{"baby_friendly": true}}
 - "free outdoor event" → {{"is_free": true, "indoor_or_outdoor": "outdoor"}}
-- "for adults" → {{"baby_friendly": false}}
-- "not free indoor events" → {{"is_free": false, "indoor_or_outdoor": "indoor"}}
-- "Find some events for me for adults and they should be free and indoor" → {{"baby_friendly": false, "is_free": true, "indoor_or_outdoor": "indoor"}}
 - "romantic date night" → {{}}
+- "stroller-accessible park" → {{"baby_friendly": true, "indoor_or_outdoor": "outdoor"}}
+- "indoor activities for kids" → {{"baby_friendly": true, "indoor_or_outdoor": "indoor"}}
+- "free museum" → {{"is_free": true, "indoor_or_outdoor": "indoor"}}
 
 Return ONLY valid JSON, no explanations."""
 
