@@ -5,10 +5,12 @@ using the agentic RAG pipeline.
 """
 
 import os
+import hashlib
+from datetime import datetime, timedelta
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, Dict, Any
 from dotenv import load_dotenv
 from backend.agents import EventRecommenderPipeline
 
@@ -39,6 +41,44 @@ app.add_middleware(
 
 # Initialize the pipeline (lazy initialization to handle errors gracefully)
 pipeline = None
+
+# Response cache (in-memory)
+response_cache: Dict[str, Dict[str, Any]] = {}
+CACHE_TTL_HOURS = 24  # Cache responses for 24 hours
+
+def get_cache_key(query: str) -> str:
+    """Generate a cache key from query string."""
+    return hashlib.md5(query.encode()).hexdigest()
+
+def get_cached_response(query: str) -> Optional[Dict[str, Any]]:
+    """Get cached response if available and not expired."""
+    cache_key = get_cache_key(query)
+    if cache_key in response_cache:
+        cached_entry = response_cache[cache_key]
+        # Check if cache is still valid
+        if datetime.now() < cached_entry['expires_at']:
+            return cached_entry['data']
+        else:
+            # Remove expired entry
+            del response_cache[cache_key]
+    return None
+
+def set_cached_response(query: str, data: Dict[str, Any]) -> None:
+    """Cache a response."""
+    cache_key = get_cache_key(query)
+    response_cache[cache_key] = {
+        'data': data,
+        'expires_at': datetime.now() + timedelta(hours=CACHE_TTL_HOURS)
+    }
+    # Limit cache size (keep only most recent 100 entries)
+    if len(response_cache) > 100:
+        # Remove oldest entries
+        sorted_entries = sorted(
+            response_cache.items(),
+            key=lambda x: x[1]['expires_at']
+        )
+        for key, _ in sorted_entries[:-100]:
+            del response_cache[key]
 
 def get_pipeline():
     """Get or initialize the pipeline."""
@@ -88,18 +128,28 @@ def recommend_events(request: QueryRequest):
         QueryResponse with recommendations and metadata
     """
     try:
+        # Check cache first
+        cached_result = get_cached_response(request.query)
+        if cached_result:
+            return QueryResponse(**cached_result)
+        
         # Get pipeline (will initialize if needed)
         active_pipeline = get_pipeline()
         # Run the pipeline
         result = active_pipeline.run(request.query)
         
-        return QueryResponse(
-            query=result["query"],
-            filters=result["filters"],
-            response=result["response"],
-            events=result["events"],
-            num_events=len(result["events"])
-        )
+        response_data = {
+            "query": result["query"],
+            "filters": result["filters"],
+            "response": result["response"],
+            "events": result["events"],
+            "num_events": len(result["events"])
+        }
+        
+        # Cache the result
+        set_cached_response(request.query, response_data)
+        
+        return QueryResponse(**response_data)
     
     except Exception as e:
         raise HTTPException(

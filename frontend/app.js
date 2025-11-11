@@ -29,6 +29,85 @@ const settingRadios = document.querySelectorAll('input[name="setting"]');
 let currentQuery = '';
 let currentResults = null;
 
+// Cache configuration
+const CACHE_PREFIX = 'nyc_events_cache_';
+const CACHE_TTL = 60 * 60 * 1000; // 1 hour in milliseconds
+
+// Cache utilities
+function getCacheKey(query) {
+    return CACHE_PREFIX + btoa(query).replace(/[/+=]/g, '_');
+}
+
+function getCachedResult(query) {
+    try {
+        const cacheKey = getCacheKey(query);
+        const cached = localStorage.getItem(cacheKey);
+        if (!cached) return null;
+        
+        const { data, timestamp } = JSON.parse(cached);
+        const age = Date.now() - timestamp;
+        
+        if (age > CACHE_TTL) {
+            localStorage.removeItem(cacheKey);
+            return null;
+        }
+        
+        return data;
+    } catch (e) {
+        console.warn('Cache read error:', e);
+        return null;
+    }
+}
+
+function setCachedResult(query, data) {
+    try {
+        const cacheKey = getCacheKey(query);
+        const cacheEntry = {
+            data: data,
+            timestamp: Date.now()
+        };
+        localStorage.setItem(cacheKey, JSON.stringify(cacheEntry));
+    } catch (e) {
+        console.warn('Cache write error:', e);
+        // If storage is full, clear old entries
+        if (e.name === 'QuotaExceededError') {
+            clearOldCacheEntries();
+        }
+    }
+}
+
+function clearOldCacheEntries() {
+    try {
+        const keys = Object.keys(localStorage);
+        const now = Date.now();
+        let cleared = 0;
+        
+        for (const key of keys) {
+            if (key.startsWith(CACHE_PREFIX)) {
+                try {
+                    const cached = JSON.parse(localStorage.getItem(key));
+                    if (now - cached.timestamp > CACHE_TTL) {
+                        localStorage.removeItem(key);
+                        cleared++;
+                    }
+                } catch (e) {
+                    localStorage.removeItem(key);
+                    cleared++;
+                }
+            }
+        }
+        
+        if (cleared > 0) {
+            console.log(`Cleared ${cleared} expired cache entries`);
+        }
+    } catch (e) {
+        console.warn('Cache cleanup error:', e);
+    }
+}
+
+// Clear old cache entries on page load
+clearOldCacheEntries();
+
 // Event Listeners
 searchForm.addEventListener('submit', handleSearch);
 
@@ -355,6 +434,15 @@ async function handleSearch(e) {
     
     currentQuery = query;
     
+    // Check cache first
+    const cachedResult = getCachedResult(query);
+    if (cachedResult) {
+        console.log('✅ Using cached result');
+        currentResults = cachedResult;
+        displayResults(cachedResult);
+        return;
+    }
+    
     // Show loading state
     showLoading();
     
@@ -373,6 +461,9 @@ async function handleSearch(e) {
         
         const data = await response.json();
         currentResults = data;
+        
+        // Cache the result
+        setCachedResult(query, data);
         
         // Display results
         displayResults(data);
@@ -447,7 +538,8 @@ function createEventCard(event, score, index) {
     card.style.animationDelay = `${index * 0.1}s`;
     
     const title = event.title || 'Untitled Event';
-    const description = event.description || 'No description available';
+    // Prefer clean_summary if available, fallback to description
+    const description = event.clean_summary || event.description || 'No description available';
     const babyFriendly = event.baby_friendly;
     const url = event.url || '#';
     
@@ -482,7 +574,8 @@ function createEventCard(event, score, index) {
 // Show event details in modal
 function showEventModal(event, score, url) {
     const title = event.title || 'Untitled Event';
-    const description = event.description || 'No description available';
+    // Prefer clean_summary if available, fallback to description
+    const description = event.clean_summary || event.description || 'No description available';
     const babyFriendly = event.baby_friendly;
     const price = event.price || 'N/A';
     const category = event.category || 'N/A';
