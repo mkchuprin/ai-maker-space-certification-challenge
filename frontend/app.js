@@ -451,9 +451,9 @@ function createEventCard(event, score, index) {
     const babyFriendly = event.baby_friendly;
     const url = event.url || '#';
     
-    // Truncate description
-    const truncatedDescription = description.length > 150 
-        ? description.substring(0, 150) + '...' 
+    // Truncate description (show ~3x more text)
+    const truncatedDescription = description.length > 450 
+        ? description.substring(0, 450) + '...' 
         : description;
     
     card.innerHTML = `
