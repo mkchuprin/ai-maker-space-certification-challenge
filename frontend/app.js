@@ -15,6 +15,9 @@ const noResults = document.getElementById('noResults');
 const aboutModal = document.getElementById('aboutModal');
 const aboutLink = document.getElementById('aboutLink');
 const closeModal = document.getElementById('closeModal');
+const eventModal = document.getElementById('eventModal');
+const eventModalContent = document.getElementById('eventModalContent');
+const closeEventModal = document.getElementById('closeEventModal');
 const question1 = document.getElementById('question1');
 const question4 = document.getElementById('question4');
 const question5 = document.getElementById('question5');
@@ -43,6 +46,16 @@ closeModal.addEventListener('click', () => {
 aboutModal.addEventListener('click', (e) => {
     if (e.target === aboutModal) {
         aboutModal.classList.add('hidden');
+    }
+});
+
+closeEventModal.addEventListener('click', () => {
+    eventModal.classList.add('hidden');
+});
+
+eventModal.addEventListener('click', (e) => {
+    if (e.target === eventModal) {
+        eventModal.classList.add('hidden');
     }
 });
 
@@ -494,24 +507,58 @@ function createEventCard(event, score, index) {
             <div>
                 <h3 class="event-title">${escapeHtml(title)}</h3>
             </div>
-            ${score !== undefined ? `<span class="event-score">Match: ${(score * 100).toFixed(0)}%</span>` : ''}
         </div>
         
         <p class="event-description">${escapeHtml(truncatedDescription)}</p>
         
-        <a href="${escapeHtml(url)}" target="_blank" class="event-link">
+        <div class="event-link">
             View Details →
-        </a>
+        </div>
     `;
     
-    // Add click handler to open link
+    // Add click handler to open modal
     card.addEventListener('click', (e) => {
-        if (!e.target.classList.contains('event-link')) {
-            window.open(url, '_blank');
-        }
+        e.preventDefault();
+        showEventModal(event, score, url);
     });
     
     return card;
+}
+
+// Show event details in modal
+function showEventModal(event, score, url) {
+    const title = event.title || 'Untitled Event';
+    const description = event.description || 'No description available';
+    const babyFriendly = event.baby_friendly;
+    const price = event.price || 'N/A';
+    const category = event.category || 'N/A';
+    const indoorOrOutdoor = event.indoor_or_outdoor || 'N/A';
+    
+    eventModalContent.innerHTML = `
+        <h2>${escapeHtml(title)}</h2>
+        
+        <div style="margin-bottom: 1.5rem;">
+            <p style="color: var(--text-secondary); line-height: 1.8;">${escapeHtml(description)}</p>
+        </div>
+        
+        <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.5rem;">
+            ${babyFriendly !== undefined ? `<span style="background: #ECFDF5; color: #065F46; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.875rem;">${babyFriendly ? '👶 Baby-Friendly' : '❌ Not Baby-Friendly'}</span>` : ''}
+            ${price !== 'N/A' ? `<span style="background: #EFF6FF; color: #1E40AF; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.875rem;">💰 ${escapeHtml(price)}</span>` : ''}
+            ${category !== 'N/A' ? `<span style="background: #FDF4FF; color: #7C2D12; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.875rem;">🎨 ${escapeHtml(category)}</span>` : ''}
+            ${indoorOrOutdoor !== 'N/A' ? `<span style="background: #F0FDF4; color: #166534; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.875rem;">${indoorOrOutdoor === 'indoor' ? '🏠 Indoor' : indoorOrOutdoor === 'outdoor' ? '🌳 Outdoor' : '🏠🌳 Indoor/Outdoor'}</span>` : ''}
+        </div>
+        
+        <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+            <a href="${escapeHtml(url)}" target="_blank" style="background: var(--primary-color); color: white; padding: 0.75rem 1.5rem; border-radius: 0.5rem; text-decoration: none; font-weight: 500; display: inline-block; transition: background 0.2s;" onmouseover="this.style.background='var(--primary-hover)'" onmouseout="this.style.background='var(--primary-color)'">
+                Open on TimeOut NYC →
+            </a>
+            <button onclick="eventModal.classList.add('hidden')" style="background: var(--border); color: var(--text-primary); padding: 0.75rem 1.5rem; border-radius: 0.5rem; border: none; font-weight: 500; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#D1D5DB'" onmouseout="this.style.background='var(--border)'">
+                Close
+            </button>
+        </div>
+    `;
+    
+    eventModal.classList.remove('hidden');
 }
 
 // Show error

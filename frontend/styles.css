@@ -703,6 +703,7 @@ body {
     font-weight: 600;
     font-size: 0.9375rem;
     transition: all 0.2s ease;
+    cursor: pointer;
 }
 
 .event-link:hover {

@@ -8,7 +8,7 @@ import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from dotenv import load_dotenv
 from agents import EventRecommenderPipeline
 
@@ -39,6 +39,26 @@ app.add_middleware(
 
 # Initialize the pipeline
 pipeline = EventRecommenderPipeline(qdrant_path="../local_qdrant")
+
+# Query cache: stores query -> result mappings
+query_cache: Dict[str, Dict[str, Any]] = {}
+
+
+def normalize_query(query: str) -> str:
+    """Normalize query for cache key (lowercase, strip whitespace)."""
+    return query.lower().strip()
+
+
+def get_cached_result(query: str) -> Optional[Dict[str, Any]]:
+    """Check if query result is cached."""
+    normalized = normalize_query(query)
+    return query_cache.get(normalized)
+
+
+def cache_result(query: str, result: Dict[str, Any]) -> None:
+    """Cache query result."""
+    normalized = normalize_query(query)
+    query_cache[normalized] = result
 
 
 class QueryRequest(BaseModel):
@@ -83,8 +103,22 @@ def recommend_events(request: QueryRequest):
         QueryResponse with recommendations and metadata
     """
     try:
-        # Run the pipeline
+        # Check cache first
+        cached_result = get_cached_result(request.query)
+        if cached_result:
+            return QueryResponse(
+                query=cached_result["query"],
+                filters=cached_result["filters"],
+                response=cached_result["response"],
+                events=[EventItem(event=e["event"], score=e["score"]) for e in cached_result["events"]],
+                num_events=len(cached_result["events"])
+            )
+        
+        # Run the pipeline if not cached
         result = pipeline.run(request.query)
+        
+        # Cache the result
+        cache_result(request.query, result)
         
         return QueryResponse(
             query=result["query"],
