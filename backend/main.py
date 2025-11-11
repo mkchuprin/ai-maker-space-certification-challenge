@@ -37,8 +37,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize the pipeline
-pipeline = EventRecommenderPipeline(qdrant_path="./local_qdrant")
+# Initialize the pipeline (lazy initialization to handle errors gracefully)
+pipeline = None
+
+def get_pipeline():
+    """Get or initialize the pipeline."""
+    global pipeline
+    if pipeline is None:
+        try:
+            pipeline = EventRecommenderPipeline(qdrant_path="./local_qdrant")
+        except Exception as e:
+            raise RuntimeError(f"Failed to initialize pipeline: {str(e)}")
+    return pipeline
 
 
 class QueryRequest(BaseModel):
@@ -77,8 +87,10 @@ def recommend_events(request: QueryRequest):
         QueryResponse with recommendations and metadata
     """
     try:
+        # Get pipeline (will initialize if needed)
+        active_pipeline = get_pipeline()
         # Run the pipeline
-        result = pipeline.run(request.query)
+        result = active_pipeline.run(request.query)
         
         return QueryResponse(
             query=result["query"],
@@ -97,13 +109,48 @@ def recommend_events(request: QueryRequest):
 @app.get("/health")
 def health_check():
     """Detailed health check with component status."""
+    components = {}
+    status = "healthy"
+    
+    # Check vector store
+    try:
+        active_pipeline = get_pipeline()
+        # Try to get collection info to verify Qdrant is accessible
+        info = active_pipeline.vector_store.get_collection_info()
+        components["vector_store"] = "online"
+        components["vector_store_points"] = info.get("points_count", 0)
+    except Exception as e:
+        components["vector_store"] = f"error: {str(e)}"
+        status = "unhealthy"
+    
+    # Check LLM (try a simple call)
+    try:
+        active_pipeline = get_pipeline()
+        # Just verify the LLM object exists and is configured
+        if hasattr(active_pipeline, 'llm') and active_pipeline.llm is not None:
+            components["llm"] = "online"
+        else:
+            components["llm"] = "error: not initialized"
+            status = "unhealthy"
+    except Exception as e:
+        components["llm"] = f"error: {str(e)}"
+        status = "unhealthy"
+    
+    # Check LangGraph
+    try:
+        active_pipeline = get_pipeline()
+        if hasattr(active_pipeline, 'app') and active_pipeline.app is not None:
+            components["langgraph"] = "online"
+        else:
+            components["langgraph"] = "error: not initialized"
+            status = "unhealthy"
+    except Exception as e:
+        components["langgraph"] = f"error: {str(e)}"
+        status = "unhealthy"
+    
     return {
-        "status": "healthy",
-        "components": {
-            "vector_store": "online",
-            "llm": "online",
-            "langgraph": "online"
-        }
+        "status": status,
+        "components": components
     }
 
 
