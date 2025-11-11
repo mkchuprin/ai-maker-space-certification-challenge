@@ -7,8 +7,6 @@ const searchInput = document.getElementById('searchInput');
 const searchButton = document.getElementById('searchButton');
 const loadingIndicator = document.getElementById('loadingIndicator');
 const resultsSection = document.getElementById('resultsSection');
-const filtersApplied = document.getElementById('filtersApplied');
-const filtersList = document.getElementById('filtersList');
 const eventCount = document.getElementById('eventCount');
 const eventsGrid = document.getElementById('eventsGrid');
 const noResults = document.getElementById('noResults');
@@ -422,54 +420,10 @@ function displayResults(data) {
     resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-// Display filters
+// Display filters (removed - filters no longer shown in UI)
 function displayFilters(filters) {
-    if (!filters || Object.keys(filters).length === 0) {
-        filtersApplied.classList.add('hidden');
-        return;
-    }
-    
-    filtersApplied.classList.remove('hidden');
-    filtersList.innerHTML = '';
-    
-    Object.entries(filters).forEach(([key, value]) => {
-        // Only display recognized filters
-        let icon = null;
-        let displayValue = null;
-        
-        if (key === 'baby_friendly') {
-            icon = value ? '👶' : '❌';
-            displayValue = value ? 'Baby-Friendly' : 'Not Baby-Friendly';
-        } else if (key === 'is_free') {
-            icon = '💰';
-            displayValue = value ? 'Free' : 'Not Free';
-        } else if (key === 'indoor_or_outdoor') {
-            icon = value === 'indoor' ? '🏠' : value === 'outdoor' ? '🌳' : '🏠🌳';
-            displayValue = value === 'indoor' ? 'Indoor' : value === 'outdoor' ? 'Outdoor' : 'Indoor/Outdoor';
-        } else if (key === 'price') {
-            icon = '💰';
-            displayValue = `Price: ${value}`;
-        } else if (key === 'category') {
-            icon = '🎨';
-            displayValue = `Category: ${value}`;
-        } else if (key === 'location') {
-            icon = '📍';
-            displayValue = `Location: ${value}`;
-        }
-        
-        // Only create tag if we have a recognized filter
-        if (icon !== null && displayValue !== null) {
-            const tag = document.createElement('div');
-            tag.className = 'filter-tag';
-            tag.innerHTML = `<span>${icon}</span><span>${displayValue}</span>`;
-            filtersList.appendChild(tag);
-        }
-    });
-    
-    // Hide filters section if no valid filters were displayed
-    if (filtersList.children.length === 0) {
-        filtersApplied.classList.add('hidden');
-    }
+    // No-op: filters section has been removed from UI
+    return;
 }
 
 // Display events

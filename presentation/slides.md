@@ -7,7 +7,7 @@
 
 **Product Name:** NYC Family Event Finder
 
-**Value Proposition:** AI-powered event recommendations that understand what "baby-friendly outdoor brunch" really means.
+**Value Proposition:** AI-powered event recommendations that understand what "baby-friendly outdoor brunch" really means, powered by real-time knowledge of what's currently happening in NYC.
 
 **Hook:**
 - **Pain:** Parents spend 30+ minutes filtering through dozens of NYC event listings, only to arrive and find venues aren't actually stroller-accessible
@@ -26,12 +26,15 @@ Keyword search can't understand "baby-friendly free outdoor activities" - it jus
 - ✅ Natural language event search (no dropdown menus)
 - ✅ Semantic understanding of context like "baby-friendly"
 - ✅ Smart filtering (price, indoor/outdoor, category)
+- ✅ Real-time knowledge of what's currently happening in NYC
 - ❌ Not building: ticket booking, user accounts, multi-city
 
 **Current Baseline (Without AI):**
 - 8-15 minutes to find relevant events
 - 3-5 search attempts per query
-- ~60% user satisfaction
+- Low satisfaction
+
+(add an image of a baby crying)
 
 ---
 
@@ -112,8 +115,8 @@ User: "baby friendly outdoor events"
 ```
 User: "baby friendly outdoor events"
 → AI understands intent + extracts filters
-→ Semantic search in vector DB (Qdrant)
-→ Returns top 5 contextually relevant events
+→ Semantic search in vector DB (Qdrant) with current NYC events
+→ Returns top 10 contextually relevant events happening now
 → Each result includes explanation + source link
 → User makes decision in <1 minute
 ```
@@ -148,48 +151,52 @@ User: "baby friendly outdoor events"
 | **L7: Lifecycle** | LangSmith tracing, cost tracking | Observability for production readiness |
 | **L8: Governance** | No PII collection, source attribution | Ethical AI practices |
 
-**Mermaid Diagram (Same as goals.md):**
+**System Architecture (8-Layer Stack):**
+
+**Part 1: Data Preparation & Qdrant Database Setup** *(Build Phase - Run Once)*
+
 ```mermaid
-flowchart TB
-  subgraph L0[Layer 0: Context & Provenance]
-    direction TB
-    L0a[Problem & Success Definitions]
-    L0b[Personas & JTBD]
-    L0c[Data Lineage & Consent]
-  end
+flowchart LR
+  L1["📊 Scrape Data<br/><b>TimeOut NYC<br/>80+ events</b>"]
+  L2["🔤 Generate<br/><b>Embeddings</b>"]
+  L3["💾 Load<br/><b>Qdrant DB</b>"]
+  L4["🤖 Build<br/><b>2 Agents</b>"]
+  L6["📈 Test<br/><b>RAGAS</b>"]
+  Output["✅ Production<br/><b>Ready</b>"]
 
-  subgraph DataLayer[" "]
-    direction LR
-    L1["Layer 1: Data Pipelines<br/><small>Scrapy → TimeOut NYC</small>"]
-    L2["Layer 2: Embedding Models<br/><small>OpenAI text-embedding-3-small</small>"]
-    L3["Layer 3: Vector DB<br/><small>Qdrant + metadata filters</small>"]
-  end
+  L1 --> L2 --> L3 --> L4 --> L6 --> Output
 
-  subgraph ProcessingLayer[" "]
-    direction LR
-    L4["Layer 4: Orchestrators / Agents<br/><small>Retrieval + Response Agents</small>"]
-    L5["Layer 5: UX<br/><small>FastAPI + citations</small>"]
-  end
+  style L1 fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px
+  style L2 fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px
+  style L3 fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px
+  style L4 fill:#e8f5e9,stroke:#388e3c,stroke-width:3px
+  style L6 fill:#fff3e0,stroke:#f57c00,stroke-width:3px
+  style Output fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
+```
 
-  subgraph OpsLayer[" "]
-    direction LR
-    L6["Layer 6: Evaluation & Observability<br/><small>RAGAS + LangSmith</small>"]
-    L7["Layer 7: Lifecycle & Ops<br/><small>cost tracking • versioning</small>"]
-  end
+**Part 2: Runtime Application Using Qdrant** *(Production Phase - Runs Per Query)*
 
-  L8["Layer 8: Governance & Feedback Loop<br/><small>PII policy • source attribution</small>"]
+```mermaid
+flowchart LR
+  Input["👤 User<br/><b>Query</b>"]
+  DB["💾 Qdrant<br/><b>Database</b>"]
+  Retrieval["🔍 Retrieval<br/><b>Agent</b>"]
+  Response["📝 Response<br/><b>Agent</b>"]
+  UI["🎨 FastAPI<br/><b>Frontend</b>"]
+  Output["✅ Results<br/><b>&lt;5 sec</b>"]
 
-  L0 --> DataLayer
-  DataLayer --> ProcessingLayer
-  ProcessingLayer --> OpsLayer
-  OpsLayer --> L8
+  Input --> Retrieval
+  DB --> Retrieval
+  Retrieval --> Response
+  Response --> UI
+  UI --> Output
 
-  L1 --> L2 --> L3
-  L4 --> L5
-  L6 --> L7
-
-  L8 -.->|"continuous feedback"| L0
-  L6 -.->|"metrics & insights"| L0
+  style Input fill:#fff9c4,stroke:#f57f17,stroke-width:3px
+  style DB fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px
+  style Retrieval fill:#e8f5e9,stroke:#388e3c,stroke-width:3px
+  style Response fill:#e8f5e9,stroke:#388e3c,stroke-width:3px
+  style UI fill:#e8f5e9,stroke:#388e3c,stroke-width:3px
+  style Output fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
 ```
 
 ---
@@ -201,7 +208,7 @@ flowchart TB
 **Frame 1: Query Input**
 - User types: *"Free baby-friendly outdoor events"*
 - UI shows loading spinner
-- **Trust Element:** "Searching 80+ events with AI-powered semantic understanding..."
+- **Trust Element:** "Searching 80+ current NYC events with AI-powered semantic understanding..."
 
 **Frame 2: Results Display**
 - Shows 5 events:
@@ -310,7 +317,8 @@ flowchart LR
 **Key Components:**
 
 1. **Data Pipeline:**
-   - Scrapy spiders fetch 80+ events from TimeOut NYC
+   - Scrapy spiders fetch 80+ current events from TimeOut NYC
+   - System knows what's happening in NYC right now (weekly updates)
    - OpenAI extracts `baby_friendly` boolean from descriptions
    - Events stored with metadata (price, indoor/outdoor, category)
 
@@ -397,7 +405,7 @@ flowchart LR
 # Slide 9 — Conclusions
 
 **Summary:**
-Built an Agentic RAG system that understands natural language event queries, retrieves contextually relevant NYC events, and provides explainable recommendations in <3 seconds. Metadata filtering improved relevance by 5-10% while maintaining sub-3s latency and <$0.10/query cost.
+Built an Agentic RAG system that understands natural language event queries, knows what's currently happening in NYC, retrieves contextually relevant events, and provides explainable recommendations in <3 seconds. Metadata filtering improved relevance by 5-10% while maintaining sub-3s latency and <$0.10/query cost.
 
 **Risks & Mitigations:**
 
