@@ -129,11 +129,22 @@ body {
     margin-top: 1.5rem;
     padding-top: 1.5rem;
     border-top: 1px solid var(--border);
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 1rem;
-    align-items: flex-start;
+    align-items: start;
+}
+
+/* Make the form (textarea) span full width below the questions */
+.query-builder > .search-form {
+    grid-column: 1 / -1;
+    width: 100%;
+}
+
+/* Make step heading and button span full width */
+.query-builder > .step-heading,
+.query-builder > .search-button {
+    grid-column: 1 / -1;
 }
 
 .radio-group.disabled {
@@ -189,13 +200,11 @@ body {
 }
 
 .radio-group {
-    flex: 1;
-    min-width: 200px;
-    max-width: 250px;
     margin-bottom: 0;
     padding: 1rem;
     border-radius: 0.75rem;
     transition: all 0.3s ease;
+    min-width: 0;
 }
 
 .radio-group.disabled {
