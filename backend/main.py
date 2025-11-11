@@ -62,6 +62,7 @@ class QueryResponse(BaseModel):
     query: str
     filters: dict
     response: str
+    events: list
     num_events: int
 
 
@@ -96,6 +97,7 @@ def recommend_events(request: QueryRequest):
             query=result["query"],
             filters=result["filters"],
             response=result["response"],
+            events=result["events"],
             num_events=len(result["events"])
         )
     

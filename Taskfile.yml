@@ -14,8 +14,16 @@ tasks:
       - task: clean-lock
       - task: start-backend
       - task: start-frontend
-      - sleep 2
+      - echo "======================================"
+      - echo "NYC Event Recommender is ready!"
+      - echo "======================================"
+      - echo "Backend at http://localhost:8000"
+      - echo "Frontend at http://localhost:3000"
+      - echo "Press Ctrl+C to stop or run task stop"
       - task: open-frontend
+      - echo "Tip - View logs with task logs"
+      - echo "Tip - Stop servers with task stop"
+      - sh -c "while true; do sleep 3600; done"
     silent: false
 
   kill-ports:
@@ -36,20 +44,21 @@ tasks:
 
   start-backend:
     desc: "Start the FastAPI backend server"
-    dir: "{{.BACKEND_DIR}}"
     cmds:
       - echo "🚀 Starting backend server..."
-      - sh -c "source ../{{.VENV}}/bin/activate && python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000 > /dev/null 2>&1 &"
-      - echo "✅ Backend starting on http://localhost:8000"
+      - sh -c "{{.VENV}}/bin/python -m uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000 > backend.log 2>&1 &"
+      - echo "⏳ Waiting for backend to start..."
+      - sleep 3
+      - sh -c "if curl -s http://localhost:8000/health > /dev/null 2>&1; then echo '✅ Backend is running on http://localhost:8000'; else echo '❌ Backend failed to start. Check backend.log for errors.'; exit 1; fi"
     silent: false
 
   start-frontend:
     desc: "Start the frontend HTTP server"
-    dir: "{{.FRONTEND_DIR}}"
     cmds:
       - echo "🌐 Starting frontend server..."
-      - sh -c "if command -v python3 > /dev/null 2>&1; then python3 -m http.server 3000 > /dev/null 2>&1 & else python -m http.server 3000 > /dev/null 2>&1 & fi"
-      - echo "✅ Frontend server starting on http://localhost:3000"
+      - sh -c "cd {{.FRONTEND_DIR}} && if command -v python3 > /dev/null 2>&1; then python3 -m http.server 3000 > ../frontend.log 2>&1 & else python -m http.server 3000 > ../frontend.log 2>&1 & fi"
+      - sleep 1
+      - sh -c "if curl -s http://localhost:3000 > /dev/null 2>&1; then echo '✅ Frontend server running on http://localhost:3000'; else echo '⚠️  Frontend server starting (may take a moment)...'; fi"
     silent: false
 
   open-frontend:
@@ -58,4 +67,19 @@ tasks:
       - echo "🌐 Opening frontend..."
       - sleep 1
       - open http://localhost:3000 || xdg-open http://localhost:3000
-      - echo "✅ Frontend opened at http://localhost:3000"
+      - echo "Frontend opened at http://localhost:3000"
+
+  stop:
+    desc: "Stop all running servers"
+    cmds:
+      - echo "🛑 Stopping servers..."
+      - task: kill-ports
+      - task: clean-lock
+      - echo "✅ All servers stopped"
+    silent: false
+
+  logs:
+    desc: "View server logs"
+    cmds:
+      - echo "Server logs (Ctrl+C to exit)"
+      - sh -c "tail -f backend.log frontend.log 2>/dev/null || echo 'No log files found. Start servers with task run'"
