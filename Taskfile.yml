@@ -46,7 +46,7 @@ tasks:
     desc: "Start the FastAPI backend server"
     cmds:
       - echo "🚀 Starting backend server..."
-      - sh -c "{{.VENV}}/bin/python -m uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000 > backend.log 2>&1 &"
+      - sh -c "uv run uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000 > backend.log 2>&1 &"
       - echo "⏳ Waiting for backend to start..."
       - sleep 3
       - sh -c "if curl -s http://localhost:8000/health > /dev/null 2>&1; then echo '✅ Backend is running on http://localhost:8000'; else echo '❌ Backend failed to start. Check backend.log for errors.'; exit 1; fi"

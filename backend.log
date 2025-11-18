@@ -1,14 +1,7 @@
 INFO:     Will watch for changes in these directories: ['/Users/michaelchuprin/Codes/Personal/aie-certification-challenge']
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-INFO:     Started reloader process [185] using WatchFiles
-INFO:     Started server process [188]
+INFO:     Started reloader process [73447] using WatchFiles
+INFO:     Started server process [73449]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-INFO:     127.0.0.1:54721 - "GET /health HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54732 - "GET /health HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54743 - "POST /recommend HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54888 - "POST /recommend HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55934 - "OPTIONS /recommend HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55934 - "POST /recommend HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56001 - "POST /recommend HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56064 - "POST /recommend HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52705 - "GET /health HTTP/1.1" 200 OK

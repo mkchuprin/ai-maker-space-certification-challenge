@@ -31,18 +31,10 @@ fi
 echo "1️⃣  Starting FastAPI backend..."
 echo ""
 
-# Activate virtual environment if it exists
-if [ -d ".venv" ]; then
-    source .venv/bin/activate
-    echo "✅ Virtual environment activated"
-fi
-
-# Start uvicorn from project root (not backend directory)
+# Start uvicorn using uv run (from project root)
 echo "🚀 Starting server on http://localhost:8000"
-cd backend
-uvicorn main:app --reload --host 0.0.0.0 --port 8000 &
+uv run uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000 &
 BACKEND_PID=$!
-cd ..
 
 # Wait for backend to start
 echo "⏳ Waiting for backend to be ready..."

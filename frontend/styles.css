@@ -366,8 +366,16 @@ body {
     pointer-events: none;
 }
 
+.radio-option input[name="baby_friendly"][value="no"] ~ .radio-label {
+    color: #DC2626;
+}
+
 .radio-option:hover .radio-label {
     color: var(--primary-color);
+}
+
+.radio-option:hover input[name="baby_friendly"][value="no"] ~ .radio-label {
+    color: #DC2626;
 }
 
 .radio-option input[type="checkbox"]:checked ~ .radio-label {
